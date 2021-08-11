@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goodix.project.weixin.device.mapper.DeviceInfoMapper">
+
+    <resultMap type="DeviceInfo" id="InfoResult">
+        <result property="deviceId"    column="device_id"    />
+        <result property="deviceMac"    column="device_mac"    />
+        <result property="deviceQrcode"    column="device_qrcode"    />
+        <result property="deviceType"    column="device_type"    />
+        <result property="appId"    column="app_id"    />
+        <result property="productId"    column="product_id"    />
+    </resultMap>
+
+    <sql id="selectInfoVo">
+        select device_id, device_mac, device_qrcode, device_type,app_id,product_id from device_info
+    </sql>
+
+    <select id="selectInfoList" parameterType="DeviceInfo" resultMap="InfoResult">
+        <include refid="selectInfoVo"/>
+        <where>
+            <if test="deviceId != null  and deviceId != '' "> and device_id = #{deviceId}</if>
+            <if test="deviceMac != null  and deviceMac != '' "> and device_mac = #{deviceMac}</if>
+            <if test="deviceQrcode != null  and deviceQrcode != '' "> and device_qrcode = #{deviceQrcode}</if>
+            <if test="deviceType != null  and deviceType != '' "> and device_type = #{deviceType}</if>
+            <if test="appId != null  and appId != '' "> and app_id = #{appId}</if>
+            <if test="productId != null  and productId != '' "> and product_id = #{productId}</if>
+        </where>
+    </select>
+
+    <select id="selectInfoById" parameterType="String" resultMap="InfoResult">
+        <include refid="selectInfoVo"/>
+        where device_id = #{deviceId}
+    </select>
+
+    <insert id="insertInfo" parameterType="DeviceInfo">
+        insert into device_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="deviceId != null  and deviceId != ''  ">device_id,</if>
+            <if test="deviceMac != null  and deviceMac != ''  ">device_mac,</if>
+            <if test="deviceQrcode != null  and deviceQrcode != ''  ">device_qrcode,</if>
+            <if test="deviceType != null  and deviceType != ''  ">device_type,</if>
+            <if test="appId != null  and appId != ''  ">app_id,</if>
+            <if test="productId != null  and productId != ''  ">product_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="deviceId != null  and deviceId != ''  ">#{deviceId},</if>
+            <if test="deviceMac != null  and deviceMac != ''  ">#{deviceMac},</if>
+            <if test="deviceQrcode != null  and deviceQrcode != ''  ">#{deviceQrcode},</if>
+            <if test="deviceType != null  and deviceType != ''  ">#{deviceType},</if>
+            <if test="appId != null  and appId != ''  ">#{appId},</if>
+            <if test="productId != null  and productId != ''  ">#{productId},</if>
+        </trim>
+    </insert>
+
+    <update id="updateInfo" parameterType="DeviceInfo">
+        update device_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="deviceMac != null  and deviceMac != ''  ">device_mac = #{deviceMac},</if>
+            <if test="deviceQrcode != null  and deviceQrcode != ''  ">device_qrcode = #{deviceQrcode},</if>
+            <if test="deviceType != null  and deviceType != ''  ">device_type = #{deviceType},</if>
+        </trim>
+        where device_id = #{deviceId}
+    </update>
+
+    <delete id="deleteInfoById" parameterType="String">
+        delete from device_info where device_id = #{deviceId}
+    </delete>
+
+    <delete id="deleteInfoByIds" parameterType="String">
+        delete from device_info where device_id in
+        <foreach item="deviceId" collection="array" open="(" separator="," close=")">
+            #{deviceId}
+        </foreach>
+    </delete>
+
+</mapper>

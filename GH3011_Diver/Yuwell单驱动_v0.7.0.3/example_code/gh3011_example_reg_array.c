@@ -1,0 +1,180 @@
+/**
+ * @copyright (c) 2003 - 2020, Goodix Co., Ltd. All rights reserved.
+ *
+ * @file    gh3011_example_reg_array.c
+ *
+ * @brief   example code for gh3011 (condensed  hbd_ctrl lib)
+ *
+ */
+
+
+#include "gh3011_example_common.h"
+
+
+// init config
+ST_HBD_INIT_CONFIG_TYPE gh30x_init_config =
+{
+    {
+        HBD_FUNCTIONAL_STATE_DISABLE,
+        HBD_LED_LOGIC_CHANNEL_MAP_PHY012,
+        HBD_LED_PD_SEL_EXTERNAL,
+        HBD_LED_PD_SEL_EXTERNAL,
+        0x14, 0x14, HBD_TIA_GAIN_2, HBD_TIA_GAIN_2,
+        HBD_SAMPLE_TIME_128CYCLES
+    }
+};
+
+
+// 以下配置数组与结构相关，请联系GOODIX输出对应数组
+
+/* getrawdata config*/
+const ST_REGISTER getrawdata_reg_config_array[] = 
+{
+    {0x0100,  0xf530},
+    {0x0102,  0x09C4},
+    {0x0104,  0xf530},
+    {0x0106,  0x2710},
+    {0x0108,  0xf530},
+    {0x010a,  0x2710},
+    {0x010c,  0xf148},
+    {0x010e,  0x0fa0},
+    {0x0110,  0xf148},
+    {0x0112,  0x30d4},
+    {0x0114,  0xf148},
+    {0x0116,  0x30d4},
+    {0x011c,  0x01FF},
+    {0x011e,  0x01FF},
+    {0x0120,  0x01FF},
+    {0x0126,  0x0202},
+    {0x0128,  0x0002},
+    {0x0130,  0x0746},
+    {0x0132,  0x0246},
+    {0x0134,  0x0346},
+    {0x16,  0x51e},
+    {0x80,  0x605},
+    {0x82,  0x1c6},
+    {0x84,  0x24},
+    {0x118,  0x1f69},
+    {0x11a,  0x004C},
+    {0x012e,  0x0004},
+    {0x0136,  0x0A0},
+    {0x0186,  0x0406},
+    {0x0180,  0x8D},
+    {0x12a,  0x0606},
+    {0x12c,  0x06},
+    {0x10C0,  0x01},
+    {0xC2,  0xFFFF},
+    {0xC4,  0x123a},
+    {0xC6,  0xFFFF},
+    {0xC8,  0x123a},
+    {0xCA,  0x00A0},
+    {0xCC,  0x006E},
+    {0xCE,  0x1140},
+    {0xD0,  0x0},
+    {0xD4,  0x1140},
+    {0xD6,  0x0},
+    {0xD8,  0x0505},
+    {0xDA,  0x0000},
+    {0xDC,  0x0101},
+    {0xDE,  0x0000},
+    {0x2A00, 0x00FF},
+    {0x2A02, 0},
+    {0X2A03, 60000},
+    {0x2A04, 0},
+    {0x2A05, 0x1388},
+    {0x2A06, 0},
+    {0x2A07, 58000},
+    {0x2A08, 0},
+    {0x2A09, 0x1f40},
+    {0x2A0A, 0},
+    {0x2A0B, 1000},
+    {0x2A0C, 0},
+    {0x2A0D, 60000},
+    {0x2A0E, 0},
+    {0x2A0F, 20000},
+    {0x2A10, 0},
+    {0x2A11, 58000},
+    {0x2A12, 0},
+    {0x2A13, 25000},
+    {0x2A14, 0},
+    {0x2A15, 1000},
+    {0x2A16, 0x0000},
+    {0x2A17, 0x0602},
+};
+const uint8_t getrawdata_reg_config_array_len = sizeof(getrawdata_reg_config_array)/sizeof(getrawdata_reg_config_array[0]);
+
+/* system test config */
+const ST_REGISTER systemtest_led0_reg_config_array[] = 
+{
+    {0x0012, 0x0d02},
+    {0x000c, 0x09f0},
+    {0x0080, 0x0405},
+    {0x0082, 0x01C4},
+    {0x012e, 0x0000},
+    {0x0186, 0x0007},
+    {0x0180, 0x008d},
+    {0x0002, 0x1321},
+    {0x0016, 0x051e},
+    {0x012e, 0x0000},
+    {0x0084, 0x0021},
+    {0x0136, 0x0090},
+    {0x0118, 0x2828},
+    {0x011a, 0x0028},
+    {0x0002, 0xFF21},
+    {0x0044, 0x0001},
+    {0x0048, 0x0001},
+};
+const uint8_t systemtest_led0_reg_config_array_len = sizeof(systemtest_led0_reg_config_array)/sizeof(systemtest_led0_reg_config_array[0]);			
+
+const ST_REGISTER systemtest_led1_reg_config_array[] = 
+{
+    {0x0012, 0x0d02},
+    {0x000c, 0x09f0},
+    {0x0080, 0x0405},
+    {0x0082, 0x01C4},
+    {0x012e, 0x0000},
+    {0x0186, 0x0007},
+    {0x0180, 0x008d},
+    {0x0002, 0x1321},
+    {0x0016, 0x051e},
+    {0x012e, 0x0000},
+    {0x0084, 0x0022},
+    {0x0136, 0x0090},
+    {0x0118, 0x2828},
+    {0x011a, 0x0028},
+    {0x0002, 0xFF21},
+    {0x0044, 0x0001},
+    {0x0048, 0x0001},
+};
+const uint8_t systemtest_led1_reg_config_array_len = sizeof(systemtest_led1_reg_config_array)/sizeof(systemtest_led1_reg_config_array[0]);
+
+const ST_REGISTER systemtest_led2_reg_config_array[] = 
+{
+    {0x0012, 0x0d02},
+    {0x000c, 0x09f0},
+    {0x0080, 0x0405},
+    {0x0082, 0x01C4},
+    {0x012e, 0x0000},
+    {0x0186, 0x0007},
+    {0x0180, 0x008d},
+    {0x0002, 0x1321},
+    {0x0016, 0x051e},
+    {0x012e, 0x0000},
+    {0x0084, 0x0024},
+    {0x0136, 0x0090},
+    {0x0118, 0x2828},
+    {0x011a, 0x0028},
+    {0x0002, 0xFF21},
+    {0x0044, 0x0001},
+    {0x0048, 0x0001},
+};
+const uint8_t systemtest_led2_reg_config_array_len = sizeof(systemtest_led2_reg_config_array)/sizeof(systemtest_led2_reg_config_array[0]);
+
+#if (__SYSTEM_TEST_SUPPORT__)
+HBDTEST_ROMALEDCheckData led0std={{15,5,0.15,35},{0,0,0,0},{0,0}};
+HBDTEST_ROMALEDCheckData led1std={{15,5,0.15,35},{0,0,0,0},{0,0}};
+HBDTEST_ROMALEDCheckData led2std={{15,5,0.15,35},{0,0,0,0},{0,0}};
+unsigned char ledmask[3]={1,1,1};
+
+#endif
+/********END OF FILE********* Copyright (c) 2003 - 2020, Goodix Co., Ltd. ********/

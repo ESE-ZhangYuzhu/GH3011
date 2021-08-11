@@ -1,0 +1,2 @@
+Application Version: ${goodix.version}
+Spring Boot Version: ${spring-boot.version}

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goodix.project.weixin.device.mapper.BindInfoMapper">
+
+    <resultMap type="BindInfo" id="InfoResult">
+        <result property="deviceId"    column="device_id"    />
+        <result property="openId"    column="open_id"    />
+        <result property="status"    column="status"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <association property="deviceInfo"    column="device_id" javaType="DeviceInfo" resultMap="deviceResult" />
+    </resultMap>
+    <resultMap type="DeviceInfo" id="deviceResult">
+        <result property="deviceMac"    column="device_mac"    />
+        <result property="deviceQrcode"    column="device_qrcode"    />
+        <result property="deviceType"    column="device_type"    />
+        <result property="appId"    column="app_id"    />
+        <result property="productId"    column="product_id"    />
+    </resultMap>
+    <sql id="selectInfoVo">
+        select device_id, open_id, status, create_by, create_time, update_by, update_time, remark from bind_info
+    </sql>
+
+    <select id="selectInfoList" parameterType="DeviceInfo" resultMap="InfoResult">
+        select b.device_id,b.open_id, b.status, b.create_by, b.create_time, b.update_by, b.update_time, b.remark, d.device_mac, d.device_qrcode, d.device_type,d.app_id,d.product_id from bind_info b
+        left join device_info d on d.device_id=b.device_id
+        <where>
+            <if test="deviceId != null  and deviceId != '' "> and b.device_id = #{deviceId}</if>
+            <if test="openId != null  and openId != '' "> and b.open_id = #{openId}</if>
+            <if test="status != null "> and b.status = #{status}</if>
+            <if test="createBy != null  and createBy != '' "> and b.create_by = #{createBy}</if>
+            <if test="createTime != null "> and b.create_time = #{createTime}</if>
+            <if test="updateBy != null  and updateBy != '' "> and b.update_by = #{updateBy}</if>
+            <if test="updateTime != null "> and b.update_time = #{updateTime}</if>
+            <if test="remark != null  and remark != '' "> and b.remark = #{remark}</if>
+            <if test="deviceInfo!=null and deviceInfo.appId != null  and deviceInfo.appId != '' "> and d.app_id = #{deviceInfo.appId}</if>
+        </where>
+    </select>
+
+    <select id="selectInfoById" parameterType="String" resultMap="InfoResult">
+        <include refid="selectInfoVo"/>
+        where device_id = #{deviceId}
+    </select>
+
+    <select id="selectInfoByInfo" parameterType="BindInfo" resultMap="InfoResult">
+        <include refid="selectInfoVo"/>
+        where device_id = #{deviceId} and open_id= #{openId}
+    </select>
+
+    <insert id="insertInfo" parameterType="DeviceInfo">
+        insert into bind_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="deviceId != null  and deviceId != ''  ">device_id,</if>
+            <if test="openId != null  and openId != ''  ">open_id,</if>
+            <if test="status != null  ">status,</if>
+            <if test="createBy != null  and createBy != ''  ">create_by,</if>
+            <if test="createTime != null  ">create_time,</if>
+            <if test="updateBy != null  and updateBy != ''  ">update_by,</if>
+            <if test="updateTime != null  ">update_time,</if>
+            <if test="remark != null  and remark != ''  ">remark,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="deviceId != null  and deviceId != ''  ">#{deviceId},</if>
+            <if test="openId != null  and openId != ''  ">#{openId},</if>
+            <if test="status != null  ">#{status},</if>
+            <if test="createBy != null  and createBy != ''  ">#{createBy},</if>
+            <if test="createTime != null  ">#{createTime},</if>
+            <if test="updateBy != null  and updateBy != ''  ">#{updateBy},</if>
+            <if test="updateTime != null  ">#{updateTime},</if>
+            <if test="remark != null  and remark != ''  ">#{remark},</if>
+        </trim>
+    </insert>
+
+    <update id="updateInfo" parameterType="DeviceInfo">
+        update bind_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="openId != null  and openId != ''  ">open_id = #{openId},</if>
+            <if test="status != null  ">status = #{status},</if>
+            <if test="createBy != null  and createBy != ''  ">create_by = #{createBy},</if>
+            <if test="createTime != null  ">create_time = #{createTime},</if>
+            <if test="updateBy != null  and updateBy != ''  ">update_by = #{updateBy},</if>
+            <if test="updateTime != null  ">update_time = #{updateTime},</if>
+            <if test="remark != null  and remark != ''  ">remark = #{remark},</if>
+        </trim>
+        where device_id = #{deviceId} and open_id=#{openId}
+    </update>
+
+    <delete id="deleteInfoById" parameterType="String">
+        delete from bind_info where device_id = #{deviceId}
+    </delete>
+
+    <delete id="deleteInfoByIds" parameterType="String">
+        delete from bind_info where device_id in
+        <foreach item="deviceId" collection="array" open="(" separator="," close=")">
+            #{deviceId}
+        </foreach>
+    </delete>
+
+</mapper>

@@ -1,0 +1,27 @@
+--cpu Cortex-M3
+".\objects\startup_stm32f10x_hd.o"
+".\objects\system_stm32f10x.o"
+".\objects\core_cm3.o"
+".\objects\misc.o"
+".\objects\stm32f10x_rcc.o"
+".\objects\stm32f10x_gpio.o"
+".\objects\stm32f10x_usart.o"
+".\objects\stm32f10x_tim.o"
+".\objects\stm32f10x_adc.o"
+".\objects\stm32f10x_i2c.o"
+".\objects\stm32f10x_spi.o"
+".\objects\stm32f10x_exti.o"
+".\objects\stm32f10x_it.o"
+".\objects\gh3011.o"
+".\Device\GH3011\hbd_ctrl_KEIL5_M3.lib"
+".\objects\configarr.o"
+".\objects\systick.o"
+".\objects\uart.o"
+".\objects\i2c.o"
+".\objects\spi.o"
+".\objects\main.o"
+".\objects\systeminit.o"
+--library_type=microlib --strict --scatter ".\Objects\STM32F10x_FWLIB_Template.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list ".\Listings\STM32F10x_FWLIB_Template.map" -o .\Objects\STM32F10x_FWLIB_Template.axf
