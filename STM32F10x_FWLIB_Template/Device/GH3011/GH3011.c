@@ -2,12 +2,11 @@
  * @Author: Zhang Yuzhu
  * @Date: 2021-08-05 15:28:10
  * @LastEditors: Zhang Yuzhu
- * @LastEditTime: 2021-08-11 11:21:52
+ * @LastEditTime: 2021-08-12 16:47:20
  * @FilePath: \STM32F10x_FWLIB_Template\Device\GH3011\GH3011.c
  * @Description: 
  */
 #include "GH3011.h"
-#include <stdio.h>
 #include "ConfigArr.h"
 
 #define GET_BYTE3_FROM_DWORD(val) ((uint8_t)((val >> 24) & 0x000000FFU))
@@ -33,6 +32,7 @@ const ST_REGISTER *gh30x_reg_config_ptr = NULL;
 uint16_t gh30x_reg_config_len = 0;
 
 HBD_INIT_CONFIG_DEFAULT_DEF(GH3011_InitStruct);
+ST_GH30X_CONFIG GH3011_ConfigStruct;
 
 static u8 GH3011_I2C_Write_Exchange_To_SPI(u8 Device_ID, const u8 Write_Buffer[], u16 Length)
 {
@@ -92,23 +92,23 @@ static u8 GH3011_I2C_Read_Exchange_To_SPI(uint8_t device_id, const uint8_t write
     return ret;
 }
 
-void gh30x_module_config(ST_GH30X_CONFIG stGh30xConfig)
+void gh30x_module_config(ST_GH30X_CONFIG *stGh30xConfig)
 {
-    gh30x_SampleRate = stGh30xConfig.SampleRate;
-    gh30x_EnableFifo = stGh30xConfig.EnableFifo;
-    gh30x_FifoThreshold = stGh30xConfig.FifoThreshold;
-    gh30x_reg_config_ptr = stGh30xConfig.reg_config_ptr;
-    gh30x_reg_config_len = stGh30xConfig.reg_config_len;
+    gh30x_SampleRate = stGh30xConfig->SampleRate;
+    gh30x_EnableFifo = stGh30xConfig->EnableFifo;
+    gh30x_FifoThreshold = stGh30xConfig->FifoThreshold;
+    gh30x_reg_config_ptr = stGh30xConfig->reg_config_ptr;
+    gh30x_reg_config_len = stGh30xConfig->reg_config_len;
 }
 
 /// gh30x load new config
-void gh30x_Load_new_config(const ST_REGISTER *config_ptr, uint16_t len)
+void gh30x_Load_new_config(const ST_REGISTER *config_ptr, uint16_t config_len)
 {
     GU8 index = 0;
 
     for (index = 0; index < __RETRY_MAX_CNT_CONFIG__ && config_ptr != NULL; index++) // retry
     {
-        if (HBD_LoadNewRegConfigArr(config_ptr, len) == HBD_RET_OK)
+        if (HBD_LoadNewRegConfigArr(config_ptr, config_len) == HBD_RET_OK)
         {
             break;
         }
@@ -125,7 +125,7 @@ void gh30x_getrawdata_start(void)
         {
             if (HBD_SimpleInit(&GH3011_InitStruct) == HBD_RET_OK)
             {
-                if (HBD_LoadNewRegConfigArr(hb_reg_config_array, hb_reg_config_array_len) == HBD_RET_OK)
+                if (HBD_LoadNewRegConfigArr(gh30x_reg_config_ptr, gh30x_reg_config_len) == HBD_RET_OK)
                 {
                     if (HBD_StartHBDOnly(gh30x_SampleRate, gh30x_EnableFifo, gh30x_FifoThreshold) == HBD_RET_OK)
                     {
@@ -186,7 +186,13 @@ u8 GH3011_Init(void)
     GH3011_Init_Flag = HBD_SimpleInit(&GH3011_InitStruct);
     GH3011_Init_Flag = HBD_SetIrqPluseWidth(255);
 
-    gh30x_getrawdata_start();
+    GH3011_ConfigStruct.EnableFifo = ENABLE;
+    GH3011_ConfigStruct.SampleRate = __GH3011_SAMPLE_RATE__;
+    GH3011_ConfigStruct.FifoThreshold = __GH3011_FIFO_TH__;
+    GH3011_ConfigStruct.reg_config_ptr = hb_reg_config_array;
+    GH3011_ConfigStruct.reg_config_len = hb_reg_config_array_len;
+
+    gh30x_module_config(&GH3011_ConfigStruct);
 
     return GH3011_Init_Flag;
 }

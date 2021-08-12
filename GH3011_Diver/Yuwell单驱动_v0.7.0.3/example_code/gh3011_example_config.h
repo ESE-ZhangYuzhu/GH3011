@@ -1,11 +1,3 @@
-/*
- * @Author: Zhang Yuzhu
- * @Date: 2021-08-09 14:04:23
- * @LastEditors: Zhang Yuzhu
- * @LastEditTime: 2021-08-09 14:54:08
- * @FilePath: \example_code\gh3011_example_config.h
- * @Description: 
- */
 /**
  * @copyright (c) 2003 - 2020, Goodix Co., Ltd. All rights reserved.
  *
@@ -24,7 +16,7 @@
 /* common */
 
 /// gh30x communicate interface type: <1=> i2c, <2=> spi
-#define __GH30X_COMMUNICATION_INTERFACE__   (GH30X_COMMUNICATION_INTERFACE_SPI)
+#define __GH30X_COMMUNICATION_INTERFACE__   (GH30X_COMMUNICATION_INTERFACE_I2C)
 
 /// gh30x default irq pluse width 20us, if need config irq pluse width, search this macro.
 #define __GH30X_IRQ_PLUSE_WIDTH_CONFIG__    (1)

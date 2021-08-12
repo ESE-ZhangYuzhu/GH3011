@@ -2,14 +2,20 @@
  * @Author: Zhang Yuzhu
  * @Date: 2021-08-10 14:26:56
  * @LastEditors: Zhang Yuzhu
- * @LastEditTime: 2021-08-10 20:19:43
+ * @LastEditTime: 2021-08-12 16:48:58
  * @FilePath: \STM32F10x_FWLIB_Template\ISR\GH3011_ISR.h
  * @Description: 
  */
 #ifndef __GH3011_ISR_H
 #define __GH3011_ISR_H
 
-#include "hbd_ctrl.h"
+#include "GH3011.h"
+
+/// reinit max cnt
+#define __RESET_REINIT_CNT_CONFIG__ (5)
+
+/// get rawdata buffer length, max 256 (use heap space)
+#define __GET_RAWDATA_BUF_LEN__ (256)
 
 void gh30x_int_msg_handler(void);
 

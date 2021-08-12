@@ -38,7 +38,7 @@ GS32 dbg_rawdata_ptr[__GET_RAWDATA_BUF_LEN__ * DBG_MCU_MODE_PKG_LEN] = {0};
 
 /// gh30x module init, include gsensor init
 int gh30x_module_init(void)
-{
+{ 
     static bool first_init_flag = true;
     GS8 init_err_flag = HBD_RET_OK;
 
@@ -50,34 +50,33 @@ int gh30x_module_init(void)
 #endif
     if (first_init_flag)
     {
-#if (__GH30X_COMMUNICATION_INTERFACE__ == GH30X_COMMUNICATION_INTERFACE_SPI)
-        hal_gh30x_spi_init();                                                                               // spi init
-        HBD_SetI2cRW(HBD_I2C_ID_SEL_1L0L, gh30x_i2c_write_exchange_to_spi, gh30x_i2c_read_exchange_to_spi); // register i2c exchange to spi api
-#else                                                                                                       // (__GH30X_COMMUNICATION_INTERFACE__ == GH30X_COMMUNICATION_INTERFACE_I2C)
-        hal_gh30x_i2c_init();                                                       // i2c init
-        HBD_SetI2cRW(HBD_I2C_ID_SEL_1L0L, hal_gh30x_i2c_write, hal_gh30x_i2c_read); // register i2c RW func api
-#endif
+        #if (__GH30X_COMMUNICATION_INTERFACE__ == GH30X_COMMUNICATION_INTERFACE_SPI)
+            hal_gh30x_spi_init(); // spi init
+            HBD_SetI2cRW(HBD_I2C_ID_SEL_1L0L, gh30x_i2c_write_exchange_to_spi, gh30x_i2c_read_exchange_to_spi); // register i2c exchange to spi api
+        #else // (__GH30X_COMMUNICATION_INTERFACE__ == GH30X_COMMUNICATION_INTERFACE_I2C)
+            hal_gh30x_i2c_init(); // i2c init
+            HBD_SetI2cRW(HBD_I2C_ID_SEL_1L0L, hal_gh30x_i2c_write, hal_gh30x_i2c_read); // register i2c RW func api
+        #endif
 
-#if (__PLATFORM_DELAY_US_CONFIG__)
-        HBD_SetDelayUsCallback(hal_gh30x_delay_us);
-#endif
+        #if (__PLATFORM_DELAY_US_CONFIG__)
+            HBD_SetDelayUsCallback(hal_gh30x_delay_us);
+        #endif
     }
 
     init_err_flag = HBD_SimpleInit(&gh30x_init_config); // init gh30x
-    if (HBD_RET_OK != init_err_flag)
-    {
+    if (HBD_RET_OK != init_err_flag)  
+	{
         EXAMPLE_DEBUG_LOG_L1("gh30x init error[%s]\r\n", dbg_ret_val_string[DEBUG_HBD_RET_VAL_BASE + init_err_flag]);
-        return GH30X_EXAMPLE_ERR_VAL;
-    }
-
+    	return GH30X_EXAMPLE_ERR_VAL;
+	}
+	
     if (first_init_flag)
     {
-
         hal_gh30x_int_init(); // gh30x int pin init
 
-#if (__GH30X_IRQ_PLUSE_WIDTH_CONFIG__)
+        #if (__GH30X_IRQ_PLUSE_WIDTH_CONFIG__)
         HBD_SetIrqPluseWidth(255); // set Irq pluse width (255us)
-#endif
+        #endif
 
         gh30x_comm_pkg_init(); // comm pkg init
 
@@ -86,7 +85,7 @@ int gh30x_module_init(void)
 
     EXAMPLE_DEBUG_LOG_L1("gh30x module init ok\r\n");
     first_init_flag = false;
-    return GH30X_EXAMPLE_OK_VAL;
+    return GH30X_EXAMPLE_OK_VAL;  
 }
 
 /// gh30x module config
@@ -99,14 +98,14 @@ void gh30x_module_config(ST_GH30X_CONFIG stGh30xConfig)
     gh30x_reg_config_len = stGh30xConfig.reg_config_len;
 }
 
-/// gh30x module start, with adt
+/// gh30x module start, with adt 
 void gh30x_module_start(void)
 {
     gh30x_start_adt_with_mode();
     EXAMPLE_DEBUG_LOG_L1("gh30x module start\r\n");
 }
 
-/// gh30x module start, without adt
+/// gh30x module start, without adt 
 void gh30x_module_start_without_adt()
 {
     gh30x_start_func_with_mode();
@@ -118,9 +117,9 @@ void gh30x_module_stop(void)
 {
     gh30x_stop_func();
     EXAMPLE_DEBUG_LOG_L1("gh30x module stop\r\n");
-#if (__USE_GOODIX_APP__)
-    goodix_app_start_app_mode = false; // if call stop, clear app mode
-#endif
+    #if (__USE_GOODIX_APP__)
+	goodix_app_start_app_mode = false; // if call stop, clear app mode
+    #endif
 }
 
 /// gh30x reset evt handler
@@ -129,20 +128,20 @@ void gh30x_reset_evt_handler(void)
     GS8 reinit_ret = HBD_RET_OK;
     GU8 reinit_cnt = __RESET_REINIT_CNT_CONFIG__;
     // reinit
-    do
+    do 
     {
         reinit_ret = HBD_SimpleInit(&gh30x_init_config);
-        reinit_cnt--;
+        reinit_cnt --;
     } while (reinit_ret != HBD_RET_OK);
     if (reinit_ret == HBD_RET_OK) // if reinit ok, restart last mode
-    {
-#if (__USE_GOODIX_APP__)
+    {	
+        #if (__USE_GOODIX_APP__)
         if (goodix_app_start_app_mode)
         {
             SEND_GH30X_RESET_EVT();
         }
         else
-#endif
+        #endif
         {
             gh30x_start_adt_with_mode();
         }
@@ -153,11 +152,22 @@ void gh30x_reset_evt_handler(void)
 /// gh30x unwear  evt handler
 void gh30x_unwear_evt_handler(void)
 {
-    gh30x_start_adt_with_mode();
-    EXAMPLE_DEBUG_LOG_L1("got gh30x unwear evt, start adt detect\r\n");
-    SEND_MCU_HB_MODE_WEAR_STATUS(WEAR_STATUS_UNWEAR, NULL, 0);
-    HAL_GH30X_FIFO_INT_TIMEOUT_TIMER_STOP();
-    handle_wear_status_result(WEAR_STATUS_UNWEAR);
+    #if (__USE_GOODIX_APP__)
+	if (goodix_app_start_app_mode)
+    {
+        SEND_AUTOLED_FAIL_EVT();
+        EXAMPLE_DEBUG_LOG_L1("got gh30x unwear evt, restart func\r\n");
+        gh30x_start_func_whithout_adt_confirm();
+    }
+    else
+    #endif
+    {
+        gh30x_start_adt_with_mode();
+        EXAMPLE_DEBUG_LOG_L1("got gh30x unwear evt, start adt detect\r\n");
+        SEND_MCU_HB_MODE_WEAR_STATUS(WEAR_STATUS_UNWEAR, NULL, 0);
+        HAL_GH30X_FIFO_INT_TIMEOUT_TIMER_STOP();
+        handle_wear_status_result(WEAR_STATUS_UNWEAR);
+    }
 }
 
 /// gh30x wear evt handler
@@ -198,7 +208,7 @@ static void gh30x_fifo_evt_getrawdata_mode_only(void)
     HBD_GetRawdataHasDone();
 #if (__USE_GOODIX_APP__)
     static GU8 uchPackId = 0;
-
+    
     for (GU16 i = 0; i < realdatalen; i++)
     {
         dbg_rawdata_ptr[i * DBG_MCU_MODE_PKG_LEN] = rawdata[i][0];
@@ -210,7 +220,7 @@ static void gh30x_fifo_evt_getrawdata_mode_only(void)
     }
 #endif
     GU8 wearing_state = WEAR_STATUS_WEAR;
-    if (1 == nRes)
+    if(1 == nRes)
     {
         wearing_state = WEAR_STATUS_UNWEAR;
     }
@@ -219,14 +229,14 @@ static void gh30x_fifo_evt_getrawdata_mode_only(void)
 
     if (wearing_state == WEAR_STATUS_UNWEAR)
     {
-        SEND_MCU_HB_MODE_RESULT(WEAR_STATUS_UNWEAR, currentarr, (GS32(*)[DBG_MCU_MODE_PKG_LEN])dbg_rawdata_ptr, realdatalen);
+        SEND_MCU_HB_MODE_RESULT(WEAR_STATUS_UNWEAR, currentarr, (GS32 (*)[DBG_MCU_MODE_PKG_LEN])dbg_rawdata_ptr, realdatalen);
         HBD_Stop();
         gh30x_handle_calc_unwear_status();
     }
     else
     {
         HAL_GH30X_FIFO_INT_TIMEOUT_TIMER_START();
-        SEND_MCU_HB_MODE_RESULT(WEAR_STATUS_WEAR, currentarr, (GS32(*)[DBG_MCU_MODE_PKG_LEN])dbg_rawdata_ptr, realdatalen);
+        SEND_MCU_HB_MODE_RESULT(WEAR_STATUS_WEAR, currentarr, (GS32 (*)[DBG_MCU_MODE_PKG_LEN])dbg_rawdata_ptr, realdatalen);
     }
     EXAMPLE_LOG_RAWDARA("get rawdata only:\r\n", dbg_rawdata_ptr, dbg_rawdata_len);
 }
@@ -241,9 +251,9 @@ void gh30x_fifo_evt_handler(void)
 /// gh30x newdata evt handler
 void gh30x_new_data_evt_handler(void)
 {
-#if (__USE_GOODIX_APP__)
-    if (goodix_app_start_app_mode)
-    {
+    #if (__USE_GOODIX_APP__)
+	if (goodix_app_start_app_mode)
+	{
         EXAMPLE_DEBUG_LOG_L2("got gh30x new data evt, send rawdata to app\n");
         if (GH30X_AUTOLED_ERR_VAL == HBD_SendRawdataPackageByNewdataInt())
         {
@@ -251,18 +261,18 @@ void gh30x_new_data_evt_handler(void)
         }
     }
     else
-#endif
+    #endif
     {
-#if (__USE_GOODIX_APP__)
+        #if (__USE_GOODIX_APP__)
         goodix_app_start_app_mode = false; // if call stop, clear app mode
-#endif
+        #endif
 
-#if (__SYSTEM_TEST_SUPPORT__)
+        #if (__SYSTEM_TEST_SUPPORT__)
         if (goodix_system_test_mode)
         {
-            if (!ledmask[goodix_system_test_os_led_num])
+            if(!ledmask[goodix_system_test_os_led_num])
             {
-                if (goodix_system_test_os_led_num < 2)
+                if(goodix_system_test_os_led_num<2)
                 {
                     goodix_system_test_os_led_num++;
                     gh30x_systemtest_os_start(goodix_system_test_os_led_num);
@@ -277,7 +287,7 @@ void gh30x_new_data_evt_handler(void)
             if (os_test_ret != 0xFF) // test has done
             {
                 EXAMPLE_DEBUG_LOG_L1("system test os[led %d] ret: %d!\r\n", goodix_system_test_os_led_num, os_test_ret);
-                if (goodix_system_test_os_led_num < 2 && (!os_test_ret))
+                if (goodix_system_test_os_led_num < 2&&(!os_test_ret))
                 {
                     goodix_system_test_os_led_num++;
                     if (goodix_system_test_os_led_num < 2 && 0 == ledmask[goodix_system_test_os_led_num])
@@ -286,7 +296,7 @@ void gh30x_new_data_evt_handler(void)
                         if (0 == ledmask[goodix_system_test_os_led_num])
                         {
                             HBD_Stop();
-                            goodix_system_test_os_led_num = goodix_system_test_os_led_num - 2;
+                            goodix_system_test_os_led_num = goodix_system_test_os_led_num - 2;                            
                             gh30x_systemtest_part2_handle(os_test_ret);
                         }
                         else
@@ -302,35 +312,35 @@ void gh30x_new_data_evt_handler(void)
                         gh30x_systemtest_part2_handle(os_test_ret);
                     }
                     else
-                    {
+                    {      
                         gh30x_systemtest_os_start(goodix_system_test_os_led_num);
                         EXAMPLE_DEBUG_LOG_L1("system test change to test next led:%d!\r\n", goodix_system_test_os_led_num);
                     }
                 }
                 else
                 {
-                    //                    goodix_system_test_mode = false;
-                    //                    EXAMPLE_DEBUG_LOG_L1("system test has done!\r\n");
+//                    goodix_system_test_mode = false;
+//                    EXAMPLE_DEBUG_LOG_L1("system test has done!\r\n");
                     HBD_Stop();
                     gh30x_systemtest_part2_handle(os_test_ret);
                 }
             }
         }
         else
-#endif
+        #endif
         {
             EXAMPLE_DEBUG_LOG_L1("got gh30x new data evt\r\n");
             GU32 PPG1, PPG2;
             GU8 nRes = HBD_GetRawdataByNewDataInt(&PPG1, &PPG2);
             GU8 wearing_state = WEAR_STATUS_WEAR;
-            if (1 == nRes)
+            if(1 == nRes)
             {
                 wearing_state = WEAR_STATUS_UNWEAR;
             }
             GS32 rawdata[1][DBG_MCU_MODE_PKG_LEN];
             rawdata[0][0] = PPG1;
             rawdata[0][1] = PPG2;
-            handle_getrawdata_mode_result(wearing_state, (GS32(*)[2])rawdata, 1);
+            handle_getrawdata_mode_result(wearing_state, (GS32 (*)[2])rawdata, 1);
             HBD_GetRawdataHasDone();
             if (wearing_state == WEAR_STATUS_UNWEAR)
             {
@@ -358,18 +368,18 @@ void gh30x_fifo_full_evt_handler(void)
 /// gh30x int msg handler
 void gh30x_int_msg_handler(void)
 {
-    GU8 gh30x_irq_status;
+	GU8 gh30x_irq_status;
     GU8 gh30x_adt_working_flag;
     HAL_GH30X_FIFO_INT_TIMEOUT_TIMER_STOP();
     gh30x_irq_status = HBD_GetIntStatus();
-    gh30x_adt_working_flag = HBD_IsAdtWearDetectHasStarted();
+	gh30x_adt_working_flag = HBD_IsAdtWearDetectHasStarted();
 
     if (gh30x_irq_status == INT_STATUS_FIFO_WATERMARK)
     {
         gh30x_fifo_evt_handler();
     }
     else if (gh30x_irq_status == INT_STATUS_NEW_DATA)
-    {
+    {      
         gh30x_new_data_evt_handler();
     }
     else if (gh30x_irq_status == INT_STATUS_WEAR_DETECTED)
@@ -382,46 +392,46 @@ void gh30x_int_msg_handler(void)
     }
     else if (gh30x_irq_status == INT_STATUS_CHIP_RESET) // if gh30x reset, need reinit
     {
-        gh30x_reset_evt_handler();
+		gh30x_reset_evt_handler();
     }
-    else if (gh30x_irq_status == INT_STATUS_FIFO_FULL) // if gh30x fifo full, need restart
+	else if (gh30x_irq_status == INT_STATUS_FIFO_FULL) // if gh30x fifo full, need restart
     {
         gh30x_fifo_full_evt_handler();
     }
-
-    if ((gh30x_adt_working_flag == 1) && (gh30x_irq_status != INT_STATUS_WEAR_DETECTED) && (gh30x_irq_status != INT_STATUS_UNWEAR_DETECTED)) // adt working
-    {
-        gh30x_start_adt_with_mode();
-    }
+	
+	if ((gh30x_adt_working_flag == 1) && (gh30x_irq_status != INT_STATUS_WEAR_DETECTED) && (gh30x_irq_status != INT_STATUS_UNWEAR_DETECTED)) // adt working
+	{
+		gh30x_start_adt_with_mode();
+	}
 }
 
 /// gh30x fifo int timeout msg handler
 void gh30x_fifo_int_timeout_msg_handler(void)
 {
     GU8 gh30x_irq_status_1;
-    GU8 gh30x_irq_status_2;
+	GU8 gh30x_irq_status_2;
 
     HAL_GH30X_FIFO_INT_TIMEOUT_TIMER_STOP();
 
-    EXAMPLE_DEBUG_LOG_L1("fifo int time out!!!\r\n");
+	EXAMPLE_DEBUG_LOG_L1("fifo int time out!!!\r\n");
 
-    gh30x_irq_status_1 = HBD_GetIntStatus();
-    gh30x_irq_status_2 = HBD_GetIntStatus();
+	gh30x_irq_status_1 = HBD_GetIntStatus();
+	gh30x_irq_status_2 = HBD_GetIntStatus();
     if ((gh30x_irq_status_1 == INT_STATUS_FIFO_WATERMARK) && (gh30x_irq_status_2 == INT_STATUS_INVALID))
-    {
-        gh30x_fifo_evt_handler();
-    }
-    else
+	{
+		gh30x_fifo_evt_handler();
+	}
+	else
     {
         gh30x_reset_evt_handler();
     }
 }
 
 /// communicate parse handler
-void gh30x_communicate_parse_handler(GS8 communicate_type, GU8 *buffer, GU8 length)
+void gh30x_communicate_parse_handler(GS8 communicate_type, GU8 *buffer, GU8 length) 
 {
 #if (__USE_GOODIX_APP__)
-    EM_COMM_CMD_TYPE comm_cmd_type = HBD_CommParseHandler(communicate_type, buffer, length); // parse recv data
+    EM_COMM_CMD_TYPE comm_cmd_type  = HBD_CommParseHandler(communicate_type, buffer, length); // parse recv data
     if (communicate_type == COMM_TYPE_INVALID_VAL)
     {
         EXAMPLE_DEBUG_LOG_L1("comm_type error, pelase check inited or not, @ref gh30x_module_init!!!\r\n");
@@ -445,7 +455,7 @@ void gh30x_communicate_parse_handler(GS8 communicate_type, GU8 *buffer, GU8 leng
         else if (comm_cmd_type == COMM_CMD_ADT_SINGLE_MODE_START) // handle mcu mode cmd
         {
             goodix_app_start_app_mode = false;
-
+            
             stGh30xConfig.SampleRate = 25;
             stGh30xConfig.EnableFifo = HBD_FUNCTIONAL_STATE_ENABLE;
             stGh30xConfig.FifoThreshold = 25;
@@ -480,9 +490,9 @@ void gh30x_stop_func(void)
 {
     HAL_GH30X_FIFO_INT_TIMEOUT_TIMER_STOP();
     HBD_Stop();
-#if (__HBD_USE_DYN_MEM__)
+    #if (__HBD_USE_DYN_MEM__)
     gh30x_free_memory();
-#endif
+    #endif
 }
 
 /// gh30x start func fix adt confirm
@@ -490,6 +500,7 @@ void gh30x_start_func_whithout_adt_confirm(void)
 {
     gh30x_start_func_with_mode();
 }
+
 
 #if (__SYSTEM_TEST_SUPPORT__)
 /// gh30x module system test os check
@@ -503,57 +514,58 @@ void gh30x_module_system_test_os_start(void)
 }
 #endif
 
+
 //gh30x module system test
 void gh30x_systemtest_start(EMGh30xTestItem mode)
-{
+{	
 #if (__SYSTEM_TEST_SUPPORT__)
-#if __PLATFORM_DELAY_US_CONFIG__
+    #if __PLATFORM_DELAY_US_CONFIG__
     EXAMPLE_DEBUG_LOG_L1("delay has been out");
     HBDTEST_set_delayFunc(&hal_gh30x_delay_us);
-#endif
-    uint8_t ret = 0;
-    if (!mode)
+    #endif
+    uint8_t ret=0;
+    if(!mode)
     {
-        handle_system_test_result(EN_PARAM_FAIL, 0);
+        handle_system_test_result(EN_PARAM_FAIL,0);
         EXAMPLE_DEBUG_LOG_L1("system test check fail, ret = %d\r\n", EN_PARAM_FAIL);
     }
-    if (mode & 0x1)
+	if(mode & 0x1)
     {
         gh30x_module_stop();
         ret = gh30x_systemtest_comm_check();
-        if (ret)
+        if(ret)
         {
-            handle_system_test_result(ret, 0);
+            handle_system_test_result(ret,0);
             return;
         }
         EXAMPLE_DEBUG_LOG_L1("system test comm check, ret = %d\r\n", ret);
     }
-    if (mode & 0x2)
+    if(mode & 0x2)
     {
         gh30x_module_stop();
         ret = gh30x_systemtest_otp_check();
-        if (ret)
+        if(ret)
         {
-            handle_system_test_result(ret, 0);
+            handle_system_test_result(ret,0);
             return;
         }
         EXAMPLE_DEBUG_LOG_L1("system test otp check, ret = %d\r\n", ret);
     }
-    if (mode & 0xc)
+    if(mode & 0xc)
     {
         goodix_system_test_mode = (mode & 0x1c) >> 1;
-        EXAMPLE_DEBUG_LOG_L1("begin goodix_system_test_mode is %d,mode is %d!\r\n", goodix_system_test_mode, mode);
-        HBDTEST_ROMALEDCheckData *hbdatalst[] = {&led0std, &led1std, &led2std};
-        for (int i = 0; i < 3; i++)
+        EXAMPLE_DEBUG_LOG_L1("begin goodix_system_test_mode is %d,mode is %d!\r\n",goodix_system_test_mode,mode);
+        HBDTEST_ROMALEDCheckData *hbdatalst[]={&led0std,&led1std,&led2std};
+        for(int i=0; i<3; i++)
         {
-            gh30x_systemtest_param_set(i, &(hbdatalst[i]->_param));
+            gh30x_systemtest_param_set(i,&(hbdatalst[i]->_param));
         }
         gh30x_module_system_test_os_start();
         EXAMPLE_DEBUG_LOG_L1("come to second part.\n");
     }
     else
     {
-        handle_system_test_result(0, 0);
+        handle_system_test_result(0,0);
     }
 #else
     EXAMPLE_DEBUG_LOG_L1("__SYSTEM_TEST_SUPPORT__ disabled in config\r\n");
@@ -563,30 +575,30 @@ void gh30x_systemtest_start(EMGh30xTestItem mode)
 #if (__SYSTEM_TEST_SUPPORT__)
 void gh30x_systemtest_part2_handle(uint8_t ret)
 {
-    EXAMPLE_DEBUG_LOG_L1("now goodix_system_test_mode is %d!\r\n", goodix_system_test_mode);
-    for (int16_t i = 0; i < 3; i++)
+    EXAMPLE_DEBUG_LOG_L1("now goodix_system_test_mode is %d!\r\n",goodix_system_test_mode);
+    for(int16_t i=0;i<3;i++)
     {
-        if (goodix_system_test_mode & (1 << i))
+        if(goodix_system_test_mode & (1<<i) )
         {
-            goodix_system_test_mode ^= (1 << i);
-            if (i == 2 && goodix_system_test_mode & 0x8)
+            goodix_system_test_mode^=(1<<i);
+            if(i==2&& goodix_system_test_mode&0x8)
             {
-                goodix_system_test_mode ^= (1 << 3);
+                goodix_system_test_mode^=(1<<3);
             }
             break;
         }
     }
-    EXAMPLE_DEBUG_LOG_L1("now goodix_system_test_mode is %d!\r\n", goodix_system_test_mode);
-    if (goodix_system_test_mode && (!ret))
+    EXAMPLE_DEBUG_LOG_L1("now goodix_system_test_mode is %d!\r\n",goodix_system_test_mode);
+    if(goodix_system_test_mode&&(!ret))
     {
         gh30x_module_system_test_os_start();
     }
     else
     {
-        goodix_system_test_mode = 0;
+        goodix_system_test_mode=0;
         EXAMPLE_DEBUG_LOG_L1("system part2 test has done!\r\n");
         HBD_Stop();
-        handle_system_test_result(ret, goodix_system_test_os_led_num);
+        handle_system_test_result(ret,goodix_system_test_os_led_num);
     }
 }
 #endif

@@ -12,11 +12,12 @@
 #include "hbd_communicate.h"
 #endif
 
+
 /// debug log string
 #if (__EXAMPLE_DEBUG_LOG_LVL__) // debug level > 0
 
-/// dbg run mode string
-const char dbg_rum_mode_string[][24] =
+    /// dbg run mode string
+    const char dbg_rum_mode_string[][24] = 
     {
         "RUN_MODE_INVALID\0",
         "RUN_MODE_INVALID\0",
@@ -25,19 +26,19 @@ const char dbg_rum_mode_string[][24] =
         "RUN_MODE_BPF_DET\0",
         "RUN_MODE_GETRAWDATA_DET\0",
         "RUN_MODE_INVALID\0",
-        "RUN_MODE_SPO2_DET\0",
-};
-/// dbg communicate cmd string
-const char dbg_comm_cmd_string[][35] =
+        "RUN_MODE_SPO2_DET\0",         
+    };
+    /// dbg communicate cmd string
+    const char dbg_comm_cmd_string[][35] = 
     {
-        "COMM_CMD_ALGO_IN_MCU_HB_START\0",
+        "COMM_CMD_ALGO_IN_MCU_HB_START\0",    
         "COMM_CMD_ALGO_IN_MCU_HB_STOP\0",
         "COMM_CMD_ALGO_IN_APP_HB_START\0",
         "COMM_CMD_ALGO_IN_APP_HB_STOP\0",
         "COMM_CMD_ALGO_IN_MCU_HRV_START\0",
         "COMM_CMD_ALGO_IN_MCU_HRV_STOP\0",
-        "COMM_CMD_ALGO_IN_APP_HRV_START\0",
-        "COMM_CMD_ALGO_IN_APP_HRV_STOP\0",
+        "COMM_CMD_ALGO_IN_APP_HRV_START\0",    
+        "COMM_CMD_ALGO_IN_APP_HRV_STOP\0",    
         "COMM_CMD_ADT_SINGLE_MODE_START\0",
         "COMM_CMD_ADT_SINGLE_MODE_STOP\0",
         "COMM_CMD_ADT_CONTINUOUS_MODE_START\0",
@@ -46,10 +47,10 @@ const char dbg_comm_cmd_string[][35] =
         "COMM_CMD_ALGO_IN_MCU_SPO2_STOP\0",
         "COMM_CMD_ALGO_IN_APP_SPO2_START\0",
         "COMM_CMD_ALGO_IN_APP_SPO2_STOP\0",
-        "COMM_CMD_INVALID\0",
-};
-/// dbg ret val string
-const char dbg_ret_val_string[][35] =
+        "COMM_CMD_INVALID\0",    
+    };
+    /// dbg ret val string
+    const char dbg_ret_val_string[][35] = 
     {
         "HBD_RET_LED_CONFIG_ALL_OFF_ERROR\0",
         "HBD_RET_NO_INITED_ERROR\0",
@@ -59,7 +60,7 @@ const char dbg_ret_val_string[][35] =
         "HBD_RET_PARAMETER_ERROR\0",
         "HBD_RET_GENERIC_ERROR\0",
         "HBD_RET_OK\0",
-};
+    };
 
 #endif
 
@@ -69,17 +70,17 @@ GU8 *g_pMem = NULL;
 
 void gh30x_malloc_memory(void)
 {
-    if (0 == g_MemReady)
+    if(0 == g_MemReady)
     {
         GS32 nMemSize = HBD_GetMemRequired(0);
-
+        
         g_pMem = hal_gh30x_memory_malloc(nMemSize);
-        if (NULL != g_pMem)
-        {
+        if(NULL != g_pMem)
+        {            
             g_MemReady = 1;
         }
     }
-    if (0 != g_pMem)
+    if(0 != g_pMem)
     {
         HBD_SetMemPtr(g_pMem);
     }
@@ -88,20 +89,20 @@ void gh30x_malloc_memory(void)
 void gh30x_free_memory(void)
 {
     g_MemReady = 0;
-    if (NULL != g_pMem)
+    if(NULL != g_pMem)
     {
         hal_gh30x_memory_free(g_pMem);
         g_pMem = NULL;
-    }
+    }    
 }
 #endif
-
+    
 /// gh30x load new config
 void gh30x_Load_new_config(const ST_REGISTER *config_ptr, uint16_t len)
 {
     GU8 index = 0;
-
-    for (index = 0; index < __RETRY_MAX_CNT_CONFIG__ && config_ptr != NULL; index++) // retry
+    
+    for (index = 0; index < __RETRY_MAX_CNT_CONFIG__ && config_ptr != NULL; index ++) // retry 
     {
         if (HBD_LoadNewRegConfigArr(config_ptr, len) == HBD_RET_OK)
         {
@@ -116,7 +117,7 @@ void gh30x_adt_wear_detect_start(const ST_REGISTER *config_ptr, GU16 config_len)
 {
     GS16 nRes = 0;
     GU8 index = 0;
-
+    
     HAL_GH30X_FIFO_INT_TIMEOUT_TIMER_STOP();
     if ((config_ptr != NULL) & (config_len != 0))
     {
@@ -125,10 +126,10 @@ void gh30x_adt_wear_detect_start(const ST_REGISTER *config_ptr, GU16 config_len)
 #endif
         gh30x_Load_new_config(config_ptr, config_len);
         nRes = HBD_AdtWearDetectStart();
-        if (nRes != HBD_RET_OK) // start
+        if (nRes != HBD_RET_OK)  // start
         {
             EXAMPLE_DEBUG_LOG_L1("gh30x adt start error : %d\r\n", nRes);
-            for (index = 0; index < __RETRY_MAX_CNT_CONFIG__; index++) // retry
+            for (index = 0; index < __RETRY_MAX_CNT_CONFIG__; index ++) // retry 
             {
                 if (HBD_SimpleInit(&gh30x_init_config) == HBD_RET_OK)
                 {
@@ -139,7 +140,7 @@ void gh30x_adt_wear_detect_start(const ST_REGISTER *config_ptr, GU16 config_len)
                             EXAMPLE_DEBUG_LOG_L1("gh30x adt start retry success\r\n");
                             break;
                         }
-                    }
+                    }    
                 }
             }
         }
@@ -160,10 +161,10 @@ void gh30x_getrawdata_start(void)
     {
         gh30x_Load_new_config(gh30x_reg_config_ptr, gh30x_reg_config_len);
     }
-    if (HBD_StartHBDOnly(gh30x_SampleRate, gh30x_EnableFifo, gh30x_FifoThreshold) != HBD_RET_OK) // start
+    if (HBD_StartHBDOnly(gh30x_SampleRate, gh30x_EnableFifo, gh30x_FifoThreshold) != HBD_RET_OK)  // start
     {
         EXAMPLE_DEBUG_LOG_L1("gh30x getrawdata start error\r\n");
-        for (index = 0; index < __RETRY_MAX_CNT_CONFIG__; index++) // retry
+        for (index = 0; index < __RETRY_MAX_CNT_CONFIG__; index ++) // retry 
         {
             if (HBD_SimpleInit(&gh30x_init_config) == HBD_RET_OK)
             {
@@ -174,7 +175,7 @@ void gh30x_getrawdata_start(void)
                         HAL_GH30X_FIFO_INT_TIMEOUT_TIMER_START();
                         break;
                     }
-                }
+                }  
             }
         }
     }
@@ -189,8 +190,8 @@ void gh30x_getrawdata_start(void)
 /// i2c exchange to spi for gh30x wrtie
 uint8_t gh30x_i2c_write_exchange_to_spi(uint8_t device_id, const uint8_t write_buffer[], uint16_t length)
 {
-    uint8_t ret = GH30X_EXAMPLE_OK_VAL;
-    if ((length == 3) && (write_buffer[0] == 0xDD) && (write_buffer[1] == 0xDD))
+	uint8_t ret = GH30X_EXAMPLE_OK_VAL;
+	if ((length == 3) && (write_buffer[0] == 0xDD) && (write_buffer[1] == 0xDD))
     {
         hal_gh30x_spi_cs_set_low();
         hal_gh30x_spi_write(&write_buffer[2], 1);
@@ -214,13 +215,13 @@ uint8_t gh30x_i2c_write_exchange_to_spi(uint8_t device_id, const uint8_t write_b
         hal_gh30x_spi_cs_set_high();
         HBD_DelayUs(10);
     }
-    return ret;
+	return ret;
 }
 
 /// i2c exchange to spi for gh30x read
 uint8_t gh30x_i2c_read_exchange_to_spi(uint8_t device_id, const uint8_t write_buffer[], uint16_t write_length, uint8_t read_buffer[], uint16_t read_length)
 {
-    uint8_t ret = GH30X_EXAMPLE_OK_VAL;
+	uint8_t ret = GH30X_EXAMPLE_OK_VAL;
     if (write_length == 2)
     {
         uint8_t spi_write_buffer[3] = {0};
@@ -240,8 +241,8 @@ uint8_t gh30x_i2c_read_exchange_to_spi(uint8_t device_id, const uint8_t write_bu
         hal_gh30x_spi_cs_set_high();
         HBD_DelayUs(10);
     }
-
-    return ret;
+    
+	return ret;
 }
 
 #endif
@@ -250,18 +251,18 @@ uint8_t gh30x_i2c_read_exchange_to_spi(uint8_t device_id, const uint8_t write_bu
 uint8_t gh30x_systemtest_comm_check(void)
 {
     uint8_t ret = 0;
-#if (__SYSTEM_TEST_SUPPORT__)
+    #if (__SYSTEM_TEST_SUPPORT__)
     ROMAHBD_Interfcae gh30x_wr_i;
     gh30x_wr_i.WR_Fun = (Write_fun)HBD_I2cWriteReg;
     gh30x_wr_i.RD_Fun = (Read_fun)HBD_I2cReadReg;
 
     HBD_I2cSendCmd(0xC0);
     HBD_DelayUs(600);
-    ret = HBDTEST_Comm_Check(&gh30x_wr_i);
+    ret=HBDTEST_Comm_Check(&gh30x_wr_i);
     HBD_I2cSendCmd(0xC4);
     HBD_DelayUs(600);
-#endif
-
+    #endif
+    
     return ret;
 }
 
@@ -270,7 +271,7 @@ uint8_t gh30x_systemtest_otp_check(void)
 {
     uint8_t ret = 0;
 
-#if (__SYSTEM_TEST_SUPPORT__)
+    #if (__SYSTEM_TEST_SUPPORT__)
     uint8_t systemtest_otp_buffer[64] = {0};
     ROMAHBD_Interfcae gh30x_wr_i;
     gh30x_wr_i.WR_Fun = (Write_fun)HBD_I2cWriteReg;
@@ -281,7 +282,7 @@ uint8_t gh30x_systemtest_otp_check(void)
     ret = HBDTEST_OTP_Check(&gh30x_wr_i, systemtest_otp_buffer);
     HBD_I2cSendCmd(0xC4);
     HBD_DelayUs(600);
-#endif
+    #endif
 
     return ret;
 }
@@ -310,17 +311,17 @@ void gh30x_systemtest_os_start(GU8 led_num)
         system_test_reg_config_ptr = systemtest_led0_reg_config_array;
         system_test_reg_config_len = systemtest_led0_reg_config_array_len;
     }
-
+    
     gh30x_Load_new_config(system_test_reg_config_ptr, system_test_reg_config_len);
 
-#if (__HBD_USE_DYN_MEM__)
+    #if (__HBD_USE_DYN_MEM__)
     gh30x_malloc_memory();
-#endif
-    GS8 res = HBD_StartHBDOnly(0, 0, 0);
-    if (res != HBD_RET_OK) // start
+    #endif
+    GS8 res = HBD_StartHBDOnly(0, 0, 0) ;
+    if (res!= HBD_RET_OK)  // start
     {
         EXAMPLE_DEBUG_LOG_L1("gh30x system start error %d\r\n", res);
-        for (index = 0; index < __RETRY_MAX_CNT_CONFIG__; index++) // retry
+        for (index = 0; index < __RETRY_MAX_CNT_CONFIG__; index ++) // retry 
         {
             if (HBD_SimpleInit(&gh30x_init_config) == HBD_RET_OK)
             {
@@ -331,7 +332,7 @@ void gh30x_systemtest_os_start(GU8 led_num)
                         HAL_GH30X_FIFO_INT_TIMEOUT_TIMER_START();
                         break;
                     }
-                }
+                }  
             }
         }
     }
@@ -341,7 +342,7 @@ void gh30x_systemtest_os_start(GU8 led_num)
 uint8_t gh30x_systemtest_os_calc(uint8_t led_num)
 {
     uint8_t ret = 0xFF;
-#if (__SYSTEM_TEST_SUPPORT__)
+    #if (__SYSTEM_TEST_SUPPORT__)
     static int32_t systemtest_rawdata_buffer[__SYSTEM_TEST_DATA_CNT_CONFIG__] = {0};
     static uint8_t systemtest_rawdata_buffer_index = 0;
     static uint8_t systemtest_last_led_num = 0;
@@ -354,107 +355,108 @@ uint8_t gh30x_systemtest_os_calc(uint8_t led_num)
 
     systemtest_rawdata_buffer[systemtest_rawdata_buffer_index] = HBD_I2cReadRawdataReg(g_usReadRawdataRegList[0]) & 0x0001FFFF;
     systemtest_rawdata_buffer_index++;
-    EXAMPLE_DEBUG_LOG_L1("got rawdata %d,the index is %d.\r\n", systemtest_rawdata_buffer[systemtest_rawdata_buffer_index - 1], systemtest_rawdata_buffer_index);
+    EXAMPLE_DEBUG_LOG_L1("got rawdata %d,the index is %d.\r\n",systemtest_rawdata_buffer[systemtest_rawdata_buffer_index-1],systemtest_rawdata_buffer_index);
     if (systemtest_rawdata_buffer_index >= __SYSTEM_TEST_DATA_CNT_CONFIG__)
     {
-        if (goodix_system_test_mode & 0x2)
+         if(goodix_system_test_mode & 0x2)
         {
             EXAMPLE_DEBUG_LOG_L1("check ctr result\n");
-            HBDTEST_ROMALEDCheckData *hbdatalst[] = {&led0std, &led1std, &led2std};
-            ret = HBDTEST_Check_CTRandNoise((int *)systemtest_rawdata_buffer, __SYSTEM_TEST_DATA_CNT_CONFIG__, hbdatalst[led_num]);
-            hbdatalst[led_num]->_res._flag |= 0x1;
-            EXAMPLE_DEBUG_LOG_L1("CTR is %f,%d\n", hbdatalst[led_num]->_res._CTR, hbdatalst[led_num]->_res._flag);
-            EXAMPLE_DEBUG_LOG_L1("NOISE is %d\n", hbdatalst[led_num]->_res._noise);
+            HBDTEST_ROMALEDCheckData *hbdatalst[]={&led0std,&led1std,&led2std};
+            ret = HBDTEST_Check_CTRandNoise((int *)systemtest_rawdata_buffer,__SYSTEM_TEST_DATA_CNT_CONFIG__,hbdatalst[led_num]);
+            hbdatalst[led_num]->_res._flag|=0x1;
+            EXAMPLE_DEBUG_LOG_L1("CTR is %f,%d\n",hbdatalst[led_num]->_res._CTR,hbdatalst[led_num]->_res._flag);
+			EXAMPLE_DEBUG_LOG_L1("NOISE is %d\n",hbdatalst[led_num]->_res._noise);
         }
-        else if (goodix_system_test_mode & 0x4)
+        else if(goodix_system_test_mode & 0x4)
         {
             EXAMPLE_DEBUG_LOG_L1("check leak result\n");
-            HBDTEST_ROMALEDCheckData *hbdatalst[] = {&led0std, &led1std, &led2std};
-            ret = HBDTEST_Check_LeakandRatio((int *)systemtest_rawdata_buffer, __SYSTEM_TEST_DATA_CNT_CONFIG__, hbdatalst[led_num]);
-            EXAMPLE_DEBUG_LOG_L1("leak is %f\n", hbdatalst[led_num]->_res._leak);
+            HBDTEST_ROMALEDCheckData *hbdatalst[]={&led0std,&led1std,&led2std};
+            ret=HBDTEST_Check_LeakandRatio((int *)systemtest_rawdata_buffer,__SYSTEM_TEST_DATA_CNT_CONFIG__,hbdatalst[led_num]);
+			EXAMPLE_DEBUG_LOG_L1("leak is %f\n",hbdatalst[led_num]->_res._leak);
         }
         else
         {
             EXAMPLE_DEBUG_LOG_L1("test error");
-            ret = EN_SELFTST_ERROR_ALL;
+            ret=EN_SELFTST_ERROR_ALL;
         }
         systemtest_rawdata_buffer_index = 0;
     }
-#else
+    #else
     ret = 0;
-#endif
+    #endif
     return ret;
 }
 
 #if (__SYSTEM_TEST_SUPPORT__)
 //analysis the config and get config
-void gh30x_systemtest_param_set(uint8_t led_num, HBDTEST_ROMAConfigParam *param)
+void gh30x_systemtest_param_set(uint8_t led_num,HBDTEST_ROMAConfigParam* param)
 {
-    const ST_REGISTER *array_list[3] = {&systemtest_led0_reg_config_array[0], &systemtest_led1_reg_config_array[0], &systemtest_led2_reg_config_array[0]};
-    const uint8_t lenth_list[3] = {systemtest_led0_reg_config_array_len, systemtest_led1_reg_config_array_len, systemtest_led2_reg_config_array_len};
-    const ST_REGISTER *reg_config_array = array_list[led_num];
-    uint8_t lenth = lenth_list[led_num];
-    int temp[5]; //118,11a,84,136,180
-    unsigned char flag = 0;
-    for (int j = 0; j < lenth; j++)
+    const ST_REGISTER *array_list[3]={&systemtest_led0_reg_config_array[0],&systemtest_led1_reg_config_array[0],&systemtest_led2_reg_config_array[0]};
+    const uint8_t lenth_list[3]={systemtest_led0_reg_config_array_len,systemtest_led1_reg_config_array_len,systemtest_led2_reg_config_array_len};
+    const ST_REGISTER *reg_config_array=array_list[led_num];
+    uint8_t lenth=lenth_list[led_num];
+    int temp[5];//118,11a,84,136,180
+    unsigned char flag=0;
+    for(int j=0;j<lenth;j++)
     {
-        if (reg_config_array[j].usRegAddr == 0x118)
+        if(reg_config_array[j].usRegAddr==0x118)
         {
-            temp[0] = reg_config_array[j].usRegData;
-            flag |= 0x1;
+            temp[0]=reg_config_array[j].usRegData;
+            flag|=0x1;
         }
-        if (reg_config_array[j].usRegAddr == 0x11a)
+        if(reg_config_array[j].usRegAddr==0x11a) 
         {
-            temp[1] = reg_config_array[j].usRegData;
-            flag |= 0x2;
+            temp[1]=reg_config_array[j].usRegData;
+            flag|=0x2;
         }
-        if (reg_config_array[j].usRegAddr == 0x84)
+        if(reg_config_array[j].usRegAddr==0x84) 
         {
-            temp[2] = reg_config_array[j].usRegData;
-            flag |= 0x4;
+            temp[2]=reg_config_array[j].usRegData;
+            flag|=0x4;
         }
-        if (reg_config_array[j].usRegAddr == 0x136)
+        if(reg_config_array[j].usRegAddr==0x136) 
         {
-            temp[3] = reg_config_array[j].usRegData;
-            flag |= 0x8;
+            temp[3]=reg_config_array[j].usRegData;
+            flag|=0x8;
         }
-        if (reg_config_array[j].usRegAddr == 0x180)
+        if(reg_config_array[j].usRegAddr==0x180)
         {
-            temp[4] = reg_config_array[j].usRegData;
-            flag |= 0x10;
+            temp[4]=reg_config_array[j].usRegData;
+            flag|=0x10;
         }
     }
-    unsigned index = 0;
-    unsigned char map = temp[2] & 0x1c0;
-    unsigned char mapobj[][3] = {{0, 1, 2}, {0, 2, 1}, {1, 0, 2}, {1, 2, 0}, {2, 0, 1}, {2, 1, 0}};
-    for (int j = 0; j < 3; j++)
+    unsigned index=0;
+    unsigned char map=temp[2]&0x1c0;
+    unsigned char mapobj[][3]={{0,1,2},{0,2,1},{1,0,2},{1,2,0},{2,0,1},{2,1,0}};
+    for(int j=0;j<3;j++)
     {
-        if (temp[2] & (1 << j))
+        if(temp[2]&(1<<j))
         {
-            index = j;
+            index=j;
             break;
         }
     }
-    index = mapobj[map][index];
-    int16_t resismap[8] = {100, 200, 380, 700, 1000, 1480, 1960, 2440};
-    float currmap[8] = {20.0, 40, 60, 80, 100, 120, 140, 160};
-    switch (index)
+    index=mapobj[map][index];
+    int16_t resismap[8]={100,200,380,700,1000,1480,1960,2440};
+    float currmap[8]={20.0,40,60,80,100,120,140,160};
+    switch(index)
     {
-    case 0:
-        param->_ledResis = resismap[(temp[3] & 0x70) >> 4];
-        param->_ledCurr = currmap[(temp[4] & 0xe0) >> 5] * (float)(temp[0] & 0xff) / 255.0f;
-        break;
-    case 1:
-        param->_ledResis = resismap[(temp[3] & 0x380) >> 7];
-        param->_ledCurr = currmap[(temp[4] & 0xe0) >> 5] * (float)((temp[0] & 0xff00) >> 8) / 255.0f;
-        break;
-    case 2:
-        param->_ledResis = resismap[(temp[3] & 0x1c00) >> 10];
-        param->_ledCurr = currmap[(temp[4] & 0xe0) >> 5] * (float)(temp[1] & 0xff) / 255.0f;
-        break;
+        case 0:
+            param->_ledResis=resismap[(temp[3]&0x70)>>4];
+            param->_ledCurr=currmap[(temp[4]&0xe0)>>5]*(float)(temp[0]&0xff)/255.0f;
+            break;
+        case 1:
+            param->_ledResis=resismap[(temp[3]&0x380)>>7];
+            param->_ledCurr=currmap[(temp[4]&0xe0)>>5]*(float)((temp[0]&0xff00)>>8)/255.0f;
+            break;
+        case 2:
+            param->_ledResis=resismap[(temp[3]&0x1c00)>>10];
+            param->_ledCurr=currmap[(temp[4]&0xe0)>>5]*(float)(temp[1]&0xff)/255.0f;
+            break;
     }
     EXAMPLE_DEBUG_LOG_L1("analysis res is %d,%f,%d\n", led_num, param->_ledCurr, param->_ledResis);
 }
 #endif
+
 
 /********END OF FILE********* Copyright (c) 2003 - 2020, Goodix Co., Ltd. ********/

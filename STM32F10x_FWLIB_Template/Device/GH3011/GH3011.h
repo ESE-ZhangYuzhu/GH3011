@@ -2,7 +2,7 @@
  * @Author: Zhang Yuzhu
  * @Date: 2021-08-05 15:28:10
  * @LastEditors: Zhang Yuzhu
- * @LastEditTime: 2021-08-11 08:50:26
+ * @LastEditTime: 2021-08-12 15:52:59
  * @FilePath: \STM32F10x_FWLIB_Template\Device\GH3011\GH3011.h
  * @Description: 
  */
@@ -11,6 +11,12 @@
 
 #include "SPI.h"
 #include "hbd_ctrl.h"
+#include <stdio.h>
+
+#define EXAMPLE_DEBUG_LOG_L1 printf
+
+#define __GH3011_SAMPLE_RATE__ (25)
+#define __GH3011_FIFO_TH__ (25)
 
 typedef struct
 {
@@ -21,6 +27,8 @@ typedef struct
     uint16_t reg_config_len;
 } ST_GH30X_CONFIG;
 
+extern ST_HBD_INIT_CONFIG_TYPE GH3011_InitStruct;
+
 extern uint16_t gh30x_SampleRate;
 extern uint8_t gh30x_EnableFifo;
 extern uint16_t gh30x_FifoThreshold;
@@ -30,7 +38,7 @@ extern uint16_t gh30x_reg_config_len;
 u8 GH3011_Init(void);
 void gh30x_getrawdata_start(void);
 void gh30x_module_config(ST_GH30X_CONFIG stGh30xConfig);
-void gh30x_Load_new_config(const ST_REGISTER *config_ptr, uint16_t len);
+void gh30x_Load_new_config(const ST_REGISTER *config_ptr, uint16_t config_len);
 void gh30x_getrawdata_start(void);
 void gh30x_adt_wear_detect_start(const ST_REGISTER *config_ptr, GU16 config_len);
 
