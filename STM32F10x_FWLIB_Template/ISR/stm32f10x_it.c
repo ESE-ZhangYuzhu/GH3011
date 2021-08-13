@@ -23,6 +23,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
+#include "GH3011_ISR.h"
+#include "GH3011.h"
 #include "GPIO_Bit_Band.h"
 #include <stdio.h>
 
@@ -184,19 +186,35 @@ void ADC1_2_IRQHandler(void)
   }
 }
 
-__IO unsigned char GH3011_FLAG_INT = RESET;
-
+// Key
 void EXTI2_IRQHandler(void)
 {
   if (EXTI_GetITStatus(EXTI_Line2) != RESET)
   {
     /********** User Code **************/
-    if (PCin(2) == 1)
+    if (PCin(2) == 0)
     {
-      GH3011_FLAG_INT = SET;
+      SysTick_Delay_ms(100);
+      if (PCin(2) == 0)
+        gh30x_adt_wear_detect_start(gh30x_reg_config_ptr, gh30x_reg_config_len);
     }
     /********** User Code End***********/
     EXTI_ClearITPendingBit(EXTI_Line2);
+  }
+}
+
+// GH3011
+void EXTI3_IRQHandler(void)
+{
+  if (EXTI_GetITStatus(EXTI_Line3) != RESET)
+  {
+    /********** User Code **************/
+    if (PAin(3) == 1)
+    {
+      gh30x_int_msg_handler();
+    }
+    /********** User Code End***********/
+    EXTI_ClearITPendingBit(EXTI_Line3);
   }
 }
 

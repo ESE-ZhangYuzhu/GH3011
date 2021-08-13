@@ -2,7 +2,7 @@
  * @Author: yz.zhang[zhang.yz2@yuyue.com.cn]
  * @Date: 2021-07-22 18:26:38
  * @LastEditors: Zhang Yuzhu
- * @LastEditTime: 2021-08-10 11:19:21
+ * @LastEditTime: 2021-08-12 20:36:55
  * @FilePath: \STM32F10x_FWLIB_Template\User\SystemInit.c
  * @Description:
  */
@@ -216,26 +216,49 @@ static void SPI_Function_Init(void)
 static void EXTI_Function_Init(void)
 {
   EXTI_DeInit();
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 
+  /*********************** User Key **************************/
   EXTI_InitTypeDef EXTI_InitStruct;
   EXTI_StructInit(&EXTI_InitStruct);
   EXTI_InitStruct.EXTI_Line = EXTI_Line2;
   EXTI_InitStruct.EXTI_LineCmd = ENABLE;
   EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
-  EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Rising;
+  EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Falling;
 
   GPIO_InitTypeDef GPIO_InitStruct;
   GPIO_StructInit(&GPIO_InitStruct);
-  GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IPD;
+  GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IPU;
   GPIO_InitStruct.GPIO_Pin = GPIO_Pin_2;
 
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
   GPIO_EXTILineConfig(GPIO_PortSourceGPIOC, GPIO_PinSource2);
 
   EXTI_ClearFlag(EXTI_Line2);
   GPIO_Init(GPIOC, &GPIO_InitStruct);
   EXTI_Init(&EXTI_InitStruct);
+  /*********************** User Key **************************/
+
+  /*********************** GH3011 **************************/
+  
+  EXTI_StructInit(&EXTI_InitStruct);
+  EXTI_InitStruct.EXTI_Line = EXTI_Line3;
+  EXTI_InitStruct.EXTI_LineCmd = ENABLE;
+  EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
+  EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Rising;
+
+  
+  GPIO_StructInit(&GPIO_InitStruct);
+  GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IPD;
+  GPIO_InitStruct.GPIO_Pin = GPIO_Pin_3;
+
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+  GPIO_EXTILineConfig(GPIO_PortSourceGPIOA, GPIO_PinSource3);
+
+  EXTI_ClearFlag(EXTI_Line3);
+  GPIO_Init(GPIOA, &GPIO_InitStruct);
+  EXTI_Init(&EXTI_InitStruct);
+  /*********************** GH3011 **************************/
 
   System_Init_Flag.Bits.b7 = 1;
 }
@@ -267,13 +290,26 @@ static unsigned char NVIC_Function_Init(void)
   /***************** ADC1_2 ******************/
 
   /***************** EXTI ********************/
+
+  /***************** Key ********************/
   NVIC_InitStruct.NVIC_IRQChannel = EXTI2_IRQn;
   NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 2;
   NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0;
   NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStruct);
   NVIC_Init_Flag.Bits.b2 = 1;
-  /***************** EXTI ********************/
+  /***************** Key ********************/
+
+  /***************** GH3011 *****************/
+  NVIC_InitStruct.NVIC_IRQChannel = EXTI3_IRQn;
+  NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 1;
+  NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0;
+  NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStruct);
+  NVIC_Init_Flag.Bits.b2 = 1;
+  /***************** GH3011 *****************/
+
+  /***************** EXTI *******************/
 
   return NVIC_Init_Flag.Byte;
 }

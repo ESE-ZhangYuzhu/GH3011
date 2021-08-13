@@ -462,6 +462,11 @@
               <FileType>1</FileType>
               <FilePath>.\ISR\stm32f10x_it.c</FilePath>
             </File>
+            <File>
+              <FileName>GH3011_ISR.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\ISR\GH3011_ISR.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
