@@ -2,7 +2,7 @@
  * @Author: yz.zhang[zhang.yz2@yuyue.com.cn]
  * @Date: 2021-07-22 18:26:38
  * @LastEditors: Zhang Yuzhu
- * @LastEditTime: 2021-08-12 20:36:55
+ * @LastEditTime: 2021-08-13 09:17:32
  * @FilePath: \STM32F10x_FWLIB_Template\User\SystemInit.c
  * @Description:
  */
@@ -104,7 +104,7 @@ static void BasicTimer_Function_Init(void)
   TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;
   TIM_TimeBaseStructInit(&TIM_TimeBaseInitStruct);
   TIM_TimeBaseInitStruct.TIM_Prescaler = SystemCoreClock / 1000 - 1; // 1ms
-  TIM_TimeBaseInitStruct.TIM_Period = 500 - 1;
+  TIM_TimeBaseInitStruct.TIM_Period = 100 - 1;
 
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE);
   TIM_TimeBaseInit(TIM6, &TIM_TimeBaseInitStruct);
@@ -240,14 +240,13 @@ static void EXTI_Function_Init(void)
   /*********************** User Key **************************/
 
   /*********************** GH3011 **************************/
-  
+
   EXTI_StructInit(&EXTI_InitStruct);
   EXTI_InitStruct.EXTI_Line = EXTI_Line3;
   EXTI_InitStruct.EXTI_LineCmd = ENABLE;
   EXTI_InitStruct.EXTI_Mode = EXTI_Mode_Interrupt;
   EXTI_InitStruct.EXTI_Trigger = EXTI_Trigger_Rising;
 
-  
   GPIO_StructInit(&GPIO_InitStruct);
   GPIO_InitStruct.GPIO_Mode = GPIO_Mode_IPD;
   GPIO_InitStruct.GPIO_Pin = GPIO_Pin_3;

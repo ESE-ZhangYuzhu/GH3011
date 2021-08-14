@@ -2,7 +2,7 @@
  * @Author: yz.zhang[zhang.yz2@yuyue.com.cn]
  * @Date: 2021-07-22 10:07:18
  * @LastEditors: Zhang Yuzhu
- * @LastEditTime: 2021-08-10 11:30:54
+ * @LastEditTime: 2021-08-13 16:08:58
  * @FilePath: \STM32F10x_FWLIB_Template\ISR\stm32f10x_it.h
  * @Description: 
  */
@@ -61,7 +61,6 @@ extern "C"
     extern __IO unsigned short int ADC1_Channel16_Value;
     void ADC1_2_IRQHandler(void);
 
-    extern __IO unsigned char GH3011_FLAG_INT;
     void EXTI2_IRQHandler(void);
 
 #ifdef __cplusplus

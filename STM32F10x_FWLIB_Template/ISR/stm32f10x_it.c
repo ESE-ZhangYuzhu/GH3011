@@ -24,7 +24,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
 #include "GH3011_ISR.h"
-#include "GH3011.h"
 #include "GPIO_Bit_Band.h"
 #include <stdio.h>
 
@@ -154,18 +153,33 @@ void SysTick_Handler(void)
 
 __IO unsigned char TIM6_500ms_Flag = 0;
 __IO unsigned char TIM6_1s_Flag = 0;
+__IO unsigned char User_Key = 0;
 
-void TIM6_IRQHandler(void)
+void TIM6_IRQHandler(void) // 100ms
 {
-  static u8 TIM6_500ms_Conter = 0;
+  static u8 TIM6_100ms_Counter = 0;
+  static u8 TIM6_500ms_Counter = 0;
   if (TIM_GetITStatus(TIM6, TIM_IT_Update) != RESET)
   {
     /********** User Code **************/
-    TIM6_500ms_Flag = 1;
-    TIM6_500ms_Conter++;
-    if (TIM6_500ms_Conter == 2)
+    TIM6_100ms_Counter++;
+    if (User_Key && TIM6_100ms_Counter == 3)
     {
-      TIM6_500ms_Conter = 0;
+      User_Key = 0;
+      if (PCin(2) == 0)
+        GH3011_ADT_WeraDetect_Start(&GH3011);
+    }
+
+    if (TIM6_100ms_Counter == 5)
+    {
+      TIM6_100ms_Counter = 0;
+      TIM6_500ms_Flag = 1;
+      TIM6_500ms_Counter++;
+    }
+
+    if (TIM6_500ms_Counter == 2)
+    {
+      TIM6_500ms_Counter = 0;
       TIM6_1s_Flag = 1;
     }
     /********** User Code End***********/
@@ -194,9 +208,7 @@ void EXTI2_IRQHandler(void)
     /********** User Code **************/
     if (PCin(2) == 0)
     {
-      SysTick_Delay_ms(100);
-      if (PCin(2) == 0)
-        gh30x_adt_wear_detect_start(gh30x_reg_config_ptr, gh30x_reg_config_len);
+      User_Key = 1;
     }
     /********** User Code End***********/
     EXTI_ClearITPendingBit(EXTI_Line2);

@@ -2,7 +2,7 @@
  * @Author: yz.zhang[zhang.yz2@yuyue.com.cn]
  * @Date: 2021-07-22 10:21:16
  * @LastEditors: Zhang Yuzhu
- * @LastEditTime: 2021-08-11 08:52:08
+ * @LastEditTime: 2021-08-13 10:43:42
  * @FilePath: \STM32F10x_FWLIB_Template\User\main.c
  * @Description: Ues STM32F103RCT6 have a nice show!
  */
@@ -34,7 +34,7 @@ int main(void)
       __IO float MCU_Temperature;
       TIM6_1s_Flag = 0;
       MCU_Temperature = (1.43 - ((float)ADC1_Channel16_Value / 0xFFF * 3.3)) / 0.0043 + 25;
-      printf("\n\rMCU_Temperature =%.2f", (float)MCU_Temperature);
+      // printf("\n\rMCU_Temperature =%.2f", (float)MCU_Temperature);
     }
   }
 }
