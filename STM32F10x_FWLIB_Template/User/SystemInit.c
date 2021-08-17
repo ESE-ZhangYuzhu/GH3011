@@ -2,7 +2,7 @@
  * @Author: yz.zhang[zhang.yz2@yuyue.com.cn]
  * @Date: 2021-07-22 18:26:38
  * @LastEditors: Zhang Yuzhu
- * @LastEditTime: 2021-08-13 09:17:32
+ * @LastEditTime: 2021-08-17 10:12:34
  * @FilePath: \STM32F10x_FWLIB_Template\User\SystemInit.c
  * @Description:
  */
@@ -100,11 +100,12 @@ static void USART_Function_Init(void)
 static void BasicTimer_Function_Init(void)
 {
   TIM_DeInit(TIM6);
+  TIM_DeInit(TIM7);
 
   TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;
   TIM_TimeBaseStructInit(&TIM_TimeBaseInitStruct);
   TIM_TimeBaseInitStruct.TIM_Prescaler = SystemCoreClock / 1000 - 1; // 1ms
-  TIM_TimeBaseInitStruct.TIM_Period = 100 - 1;
+  TIM_TimeBaseInitStruct.TIM_Period = 500 - 1;
 
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE);
   TIM_TimeBaseInit(TIM6, &TIM_TimeBaseInitStruct);
@@ -112,6 +113,17 @@ static void BasicTimer_Function_Init(void)
   TIM_ClearFlag(TIM6, TIM_FLAG_Update);
   TIM_ITConfig(TIM6, TIM_IT_Update, ENABLE);
   TIM_Cmd(TIM6, DISABLE);
+
+  TIM_TimeBaseInitStruct.TIM_Prescaler = SystemCoreClock / 1000 - 1; // 1ms
+  TIM_TimeBaseInitStruct.TIM_Period = 20 - 1;
+
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM7, ENABLE);
+  TIM_TimeBaseInit(TIM7, &TIM_TimeBaseInitStruct);
+
+  TIM_ClearFlag(TIM7, TIM_FLAG_Update);
+  TIM_ITConfig(TIM7, TIM_IT_Update, ENABLE);
+  TIM_Cmd(TIM7, DISABLE);
+
   System_Init_Flag.Bits.b3 = 1;
 }
 
@@ -279,13 +291,22 @@ static unsigned char NVIC_Function_Init(void)
   NVIC_Init_Flag.Bits.b0 = 1;
   /***************** TIM6 ******************/
 
+  /***************** TIM7 ******************/
+  NVIC_InitStruct.NVIC_IRQChannel = TIM7_IRQn;
+  NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 2;
+  NVIC_InitStruct.NVIC_IRQChannelSubPriority = 1;
+  NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStruct);
+  NVIC_Init_Flag.Bits.b1 = 1;
+  /***************** TIM7 ******************/
+
   /***************** ADC1_2 ******************/
   NVIC_InitStruct.NVIC_IRQChannel = ADC1_2_IRQn;
   NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 3;
   NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0;
   NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStruct);
-  NVIC_Init_Flag.Bits.b1 = 1;
+  NVIC_Init_Flag.Bits.b2 = 1;
   /***************** ADC1_2 ******************/
 
   /***************** EXTI ********************/
@@ -296,7 +317,7 @@ static unsigned char NVIC_Function_Init(void)
   NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0;
   NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStruct);
-  NVIC_Init_Flag.Bits.b2 = 1;
+  NVIC_Init_Flag.Bits.b3 = 1;
   /***************** Key ********************/
 
   /***************** GH3011 *****************/
@@ -305,7 +326,7 @@ static unsigned char NVIC_Function_Init(void)
   NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0;
   NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStruct);
-  NVIC_Init_Flag.Bits.b2 = 1;
+  NVIC_Init_Flag.Bits.b4 = 1;
   /***************** GH3011 *****************/
 
   /***************** EXTI *******************/

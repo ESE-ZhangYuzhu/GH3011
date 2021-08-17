@@ -153,30 +153,15 @@ void SysTick_Handler(void)
 
 __IO unsigned char TIM6_500ms_Flag = 0;
 __IO unsigned char TIM6_1s_Flag = 0;
-__IO unsigned char User_Key = 0;
 
-void TIM6_IRQHandler(void) // 100ms
+void TIM6_IRQHandler(void) // 500ms
 {
-  static u8 TIM6_100ms_Counter = 0;
   static u8 TIM6_500ms_Counter = 0;
   if (TIM_GetITStatus(TIM6, TIM_IT_Update) != RESET)
   {
     /********** User Code **************/
-    TIM6_100ms_Counter++;
-    if (User_Key && TIM6_100ms_Counter == 3)
-    {
-      User_Key = 0;
-      if (PCin(2) == 0)
-        GH3011_ADT_WeraDetect_Start(&GH3011);
-    }
-
-    if (TIM6_100ms_Counter == 5)
-    {
-      TIM6_100ms_Counter = 0;
-      TIM6_500ms_Flag = 1;
-      TIM6_500ms_Counter++;
-    }
-
+    TIM6_500ms_Flag = 1;
+    TIM6_500ms_Counter++;
     if (TIM6_500ms_Counter == 2)
     {
       TIM6_500ms_Counter = 0;
@@ -184,6 +169,19 @@ void TIM6_IRQHandler(void) // 100ms
     }
     /********** User Code End***********/
     TIM_ClearITPendingBit(TIM6, TIM_IT_Update);
+  }
+}
+
+void TIM7_IRQHandler(void) // 20ms
+{
+  if (TIM_GetITStatus(TIM7, TIM_IT_Update) != RESET)
+  {
+    /********** User Code **************/
+    TIM_Cmd(TIM7, DISABLE);
+    if (0 == PCin(2))
+      GH3011_ADT_WeraDetect_Start(&GH3011);
+    /********** User Code End***********/
+    TIM_ClearITPendingBit(TIM7, TIM_IT_Update);
   }
 }
 
@@ -208,7 +206,7 @@ void EXTI2_IRQHandler(void)
     /********** User Code **************/
     if (PCin(2) == 0)
     {
-      User_Key = 1;
+      TIM_Cmd(TIM7, ENABLE);
     }
     /********** User Code End***********/
     EXTI_ClearITPendingBit(EXTI_Line2);
