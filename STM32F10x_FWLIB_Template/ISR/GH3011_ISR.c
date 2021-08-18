@@ -2,11 +2,12 @@
  * @Author: Zhang Yuzhu
  * @Date: 2021-08-10 14:26:56
  * @LastEditors: Zhang Yuzhu
- * @LastEditTime: 2021-08-13 16:48:03
+ * @LastEditTime: 2021-08-17 15:43:42
  * @FilePath: \STM32F10x_FWLIB_Template\ISR\GH3011_ISR.c
  * @Description: 
  */
 #include "GH3011_ISR.h"
+#include "UART.h"
 
 /// gh30x reset evt handler
 static void gh30x_reset_evt_handler(void)
@@ -59,28 +60,19 @@ static void gh30x_wear_evt_handler(void) // 如果检测到佩戴成功，就进
     GH3011_GetRawData_Start(&GH3011);
 }
 
-/// gh30x fifo evt handler
+// gh30x fifo evt handler
+// 一帧数据中 包含2个PPG数据 PPG0 是绿光数据 PPG1是红外光数据
 static void gh30x_fifo_evt_handler(void)
 {
     GH3011_DEBUG_LOG("\n\r got gh30x fifo evt");
     GU16 realdatalen = 0;
     GS32 rawdata[__GET_RAWDATA_BUF_LEN__][2] = {0};
-    GU8 nRes = 0;
-    nRes = HBD_GetRawdataByFifoInt(__GET_RAWDATA_BUF_LEN__, rawdata, &realdatalen);
-    GH3011_DEBUG_LOG("\n\r Get Raw data By FIFO result %d", nRes);
 
-    GH3011_DEBUG_LOG("\n\rGreen PPG Raw Data:");
-    for (u8 i = 0; i < realdatalen; i++)
-    {
-        GH3011_DEBUG_LOG("\t%X", rawdata[i][0]);
-    }
+    if (HBD_RET_OK == HBD_GetRawdataByFifoInt(__GET_RAWDATA_BUF_LEN__, rawdata, &realdatalen))
+        GH3011_DEBUG_LOG("\n\r Get Raw Data By FIFO Success!");
+    else
+        GH3011_DEBUG_LOG("\n\r Get Raw Data By FIFO Failed!");
 
-    GH3011_DEBUG_LOG("\n\rIR PPG Raw Data :");
-    for (u8 j = 0; j < realdatalen; j++)
-    {
-
-        GH3011_DEBUG_LOG("\t%X", rawdata[j][1]);
-    }
     HBD_GetRawdataHasDone();
 }
 

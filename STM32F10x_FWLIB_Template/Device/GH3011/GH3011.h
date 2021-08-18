@@ -2,7 +2,7 @@
  * @Author: Zhang Yuzhu
  * @Date: 2021-08-05 15:28:10
  * @LastEditors: Zhang Yuzhu
- * @LastEditTime: 2021-08-13 16:23:43
+ * @LastEditTime: 2021-08-17 15:49:23
  * @FilePath: \STM32F10x_FWLIB_Template\Device\GH3011\GH3011.h
  * @Description: 
  */
@@ -21,7 +21,7 @@
 #include "hbd_ctrl.h"
 #include <stdio.h>
 
-#define __GH3011_SAMPLE_RATE__ (50)
+#define __GH3011_SAMPLE_RATE__ (25)
 #define __GH3011_FIFO_TH__ (100)
 
 typedef struct
@@ -33,12 +33,17 @@ typedef struct
     uint16_t reg_config_len;
 } ST_GH30X_CONFIG;
 
+typedef union
+{
+    u32 RawData;
+    u8 RawData_Byte[4];
+} GH3011_SingleRawData;
+
 struct GH3011_DeviceStruct_Type
 {
     ST_GH30X_CONFIG ConfigStruct;
     ST_HBD_INIT_CONFIG_TYPE InitStruct;
 };
-
 extern struct GH3011_DeviceStruct_Type GH3011;
 
 u8 GH3011_Init(void);
