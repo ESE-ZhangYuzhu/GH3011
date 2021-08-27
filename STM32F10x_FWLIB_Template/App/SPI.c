@@ -2,7 +2,7 @@
  * @Author: Zhang Yuzhu
  * @Date: 2021-08-05 14:25:35
  * @LastEditors: Zhang Yuzhu
- * @LastEditTime: 2021-08-09 16:41:47
+ * @LastEditTime: 2021-08-24 13:55:10
  * @FilePath: \STM32F10x_FWLIB_Template\App\SPI.c
  * @Description: 
  */
@@ -22,8 +22,9 @@ __INLINE static u8 SPI_TimeOverFlow_UserCallBack(u8 ErrorCode)
     return ErrorCode;
 }
 
-void SPI_CS_Control(u8 CS_Level)
+u8 SPI_CS_Control(u8 CS_Level)
 {
+    u8 SPI_CS_Flag = SUCCESS;
     __IO u8 SPI_WaitTime = 0;
     if (CS_Level != 0)
     {
@@ -40,6 +41,7 @@ void SPI_CS_Control(u8 CS_Level)
     {
         PAout(4) = 0;
     }
+    return SPI_CS_Flag;
 }
 
 u8 SPI_WriteData(const u8 WriteBytesArr[], u16 WriteLen)

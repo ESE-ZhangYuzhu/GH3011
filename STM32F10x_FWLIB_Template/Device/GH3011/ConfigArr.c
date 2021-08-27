@@ -2,7 +2,7 @@
  * @Author: Zhang Yuzhu
  * @Date: 2021-08-09 19:19:14
  * @LastEditors: Zhang Yuzhu
- * @LastEditTime: 2021-08-10 21:12:25
+ * @LastEditTime: 2021-08-26 13:33:27
  * @FilePath: \STM32F10x_FWLIB_Template\Device\GH3011\ConfigArr.c
  * @Description: 
  */
@@ -47,7 +47,7 @@ const ST_REGISTER hb_reg_config_array[] =
         {0x12c, 0x06},
         {0x10C0, 0x01},
         {0xC2, 0xFFFF},
-        {0xC4, 0x034b},
+        {0xC4, 0x134b},
         {0xC6, 0xFFFF},
         {0xC8, 0x034b},
         {0xCA, 0x00A0},

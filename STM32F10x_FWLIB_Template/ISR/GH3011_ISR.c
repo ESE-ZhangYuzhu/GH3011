@@ -2,134 +2,137 @@
  * @Author: Zhang Yuzhu
  * @Date: 2021-08-10 14:26:56
  * @LastEditors: Zhang Yuzhu
- * @LastEditTime: 2021-08-17 15:43:42
+ * @LastEditTime: 2021-08-27 09:29:01
  * @FilePath: \STM32F10x_FWLIB_Template\ISR\GH3011_ISR.c
  * @Description: 
  */
 #include "GH3011_ISR.h"
 #include "UART.h"
 
-/// gh30x reset evt handler
-static void gh30x_reset_evt_handler(void)
+/// GH3011 reset Event Handler
+static void GH3011_Reset_Event_Handler(void)
 {
-    GS8 reinit_ret = HBD_RET_OK;
-    GU8 reinit_cnt = __RESET_REINIT_CNT_CONFIG__;
+    GS8 Reinit_Ret = HBD_RET_OK;
+    GU8 Reinit_Cnt = __RESET_REINIT_CNT_CONFIG__;
 
-    GH3011_DEBUG_LOG("\n\r GH3011 reset hander!");
+    GH3011_DEBUG_LOG("\n\r GH3011 Reset Hander!");
 
     do
     {
-        reinit_ret = HBD_SimpleInit(&GH3011.InitStruct); // 初始化GH3011
-        if ((reinit_cnt--) == 0)
+        Reinit_Ret = HBD_SimpleInit(&GH3011.InitStruct); // 初始化GH3011
+        if ((Reinit_Cnt--) == 0)
         {
-            GH3011_DEBUG_LOG("\n\r GH3011 reset handler error!");
+            GH3011_DEBUG_LOG("\n\r GH3011 reset Handler error!");
             break;
         }
-    } while (reinit_ret != HBD_RET_OK);
+    } while (Reinit_Ret != HBD_RET_OK);
 
-    if (reinit_ret == HBD_RET_OK)
+    if (Reinit_Ret == HBD_RET_OK)
     {
         GH3011_DEBUG_LOG("\n\r GH3011 reset and Init success!"); // if reinit ok, restart last mode
         GH3011_ADT_WeraDetect_Start(&GH3011);                    // 初始化成功后开启佩戴检测
     }
 }
 
-/// gh30x unwear  evt handler
-static void gh30x_unwear_evt_handler(void) // 如果检测到佩戴失败，就再次检测
+/// GH3011 unwear  Event Handler
+static void GH3011_Unwear_Event_Handler(void) // 如果在测量过程中检测到佩戴失败，就立即停止
 {
-    static u8 GH3011_Unwear_Counter = 0;
-    GH3011_Unwear_Counter++;
-
-    if (GH3011_Unwear_Counter < 5)
-    {
-        GH3011_DEBUG_LOG("\n\r got gh30x unwear evt, start adt detect");
-        GH3011_ADT_WeraDetect_Start(&GH3011);
-    }
-    else
-    {
-        GH3011_Unwear_Counter = 0;
-        GH3011_DEBUG_LOG("\n\r GH3011 got too many unwear evt, STOP Detecting!");
-        HBD_Stop();
-    }
+    GH3011_DEBUG_LOG("\n\r GH3011 Got Unwear Event, STOP Detecting!");
+    HBD_Stop();
 }
 
-/// gh30x wear evt handler
-static void gh30x_wear_evt_handler(void) // 如果检测到佩戴成功，就进行数据采集
+/// GH3011 wear Event Handler
+static void GH3011_Wear_Event_Handler(void) // 如果检测到佩戴成功，就进行数据采集
 {
-    GH3011_DEBUG_LOG("\n\r got gh30x wear evt, get raw data start");
+    GH3011_DEBUG_LOG("\n\r Got GH3011 Wear Event, get raw data start");
     GH3011_GetRawData_Start(&GH3011);
 }
 
-// gh30x fifo evt handler
+// GH3011 FIFO Event Handler
 // 一帧数据中 包含2个PPG数据 PPG0 是绿光数据 PPG1是红外光数据
-static void gh30x_fifo_evt_handler(void)
+static void GH3011_FIFO_Event_Handler(void)
 {
-    GH3011_DEBUG_LOG("\n\r got gh30x fifo evt");
-    GU16 realdatalen = 0;
-    GS32 rawdata[__GET_RAWDATA_BUF_LEN__][2] = {0};
+    // GH3011_DEBUG_LOG("\n\r Got GH3011 FIFO Event");
+    GU16 Real_DataLength = 0;
+    GS32 Raw_Data[__GET_RAWDATA_BUF_LEN__][2] = {0};
 
-    if (HBD_RET_OK == HBD_GetRawdataByFifoInt(__GET_RAWDATA_BUF_LEN__, rawdata, &realdatalen))
-        GH3011_DEBUG_LOG("\n\r Get Raw Data By FIFO Success!");
+    if (HBD_RET_OK == HBD_GetRawdataByFifoInt(__GET_RAWDATA_BUF_LEN__, Raw_Data, &Real_DataLength))
+    {
+        u8 Raw_Data_Index = 0;
+        while (Real_DataLength--)
+        {
+            GH3011.GH3011_RawData[Raw_Data_Index].RawData[0] = Raw_Data[Raw_Data_Index][0]; // PPG0
+            GH3011.GH3011_RawData[Raw_Data_Index].RawData[1] = Raw_Data[Raw_Data_Index][1]; // PPG1
+            printf("\n\r %08X\t%08X", GH3011.GH3011_RawData[Raw_Data_Index].RawData[0], GH3011.GH3011_RawData[Raw_Data_Index].RawData[1]);
+            Raw_Data_Index++;
+        }
+        // GH3011_DEBUG_LOG("\n\r Get Raw Data By FIFO Success!");
+    }
     else
+    {
         GH3011_DEBUG_LOG("\n\r Get Raw Data By FIFO Failed!");
+    }
 
     HBD_GetRawdataHasDone();
 }
 
-/// gh30x newdata evt handler
-static void gh30x_new_data_evt_handler(void)
+/// GH3011 NewdDta Event Handler
+static void GH3011_New_Data_Event_Handler(void)
 {
-    GH3011_DEBUG_LOG("\n\r got gh30x new data evt");
+    GH3011_DEBUG_LOG("\n\r Got GH3011 New Data Event");
     GU32 PPG1, PPG2;
-    GU8 nRes = HBD_GetRawdataByNewDataInt(&PPG1, &PPG2);
-    GH3011_DEBUG_LOG("\n\r Get Raw data By New data result %d", nRes);
+    if (HBD_RET_OK == HBD_GetRawdataByNewDataInt(&PPG1, &PPG2))
+        GH3011_DEBUG_LOG("\n\r Get Raw Data By New Success!");
+    else
+        GH3011_DEBUG_LOG("\n\r Get Raw Data By New Success!");
+
     HBD_GetRawdataHasDone();
 }
 
-/// gh30x fifo full evt handler
-static void gh30x_fifo_full_evt_handler(void)
+/// GH3011 FIFO Full Event Handler
+static void GH3011_FIFO_Full_Event_Handler(void)
 {
     HBD_Stop();
-    GH3011_DEBUG_LOG("got gh30x fifo full evt, shouldn't reach here!!\r\n");
+    GH3011_DEBUG_LOG("Got GH3011 FIFO Full Event, shouldn't reach here!!\r\n");
     HBD_ChipReset();
 }
 
-/// gh30x int msg handler
-void gh30x_int_msg_handler(void)
+/// GH3011 Handler
+void GH3011_Handler(void)
 {
-    GU8 gh30x_irq_status;
-    GU8 gh30x_adt_working_flag;
-    gh30x_irq_status = HBD_GetIntStatus();
-    gh30x_adt_working_flag = HBD_IsAdtWearDetectHasStarted();
+    GU8 GH3011_IRQ_Status;
+    GU8 GH3011_ADT_Working_Flag;
+    GH3011_IRQ_Status = HBD_GetIntStatus();
+    GH3011_ADT_Working_Flag = HBD_IsAdtWearDetectHasStarted();
 
-    if (gh30x_irq_status == INT_STATUS_FIFO_WATERMARK) // FIFO 阈值
+    if (GH3011_IRQ_Status == INT_STATUS_FIFO_WATERMARK) // FIFO 阈值
     {
-        gh30x_fifo_evt_handler();
+        GH3011_FIFO_Event_Handler();
     }
-    else if (gh30x_irq_status == INT_STATUS_NEW_DATA) // 新数据就绪
+    else if (GH3011_IRQ_Status == INT_STATUS_NEW_DATA) // 新数据就绪
     {
-        gh30x_new_data_evt_handler();
+        GH3011_New_Data_Event_Handler();
     }
-    else if (gh30x_irq_status == INT_STATUS_WEAR_DETECTED) // 佩戴成功
+    else if (GH3011_IRQ_Status == INT_STATUS_WEAR_DETECTED) // 佩戴成功
     {
-        gh30x_wear_evt_handler();
+        GH3011_Wear_Event_Handler();
     }
-    else if (gh30x_irq_status == INT_STATUS_UNWEAR_DETECTED) // 佩戴失败，脱落
+    else if (GH3011_IRQ_Status == INT_STATUS_UNWEAR_DETECTED) // 佩戴失败，脱落
     {
-        gh30x_unwear_evt_handler();
+        GH3011_Unwear_Event_Handler();
     }
-    else if (gh30x_irq_status == INT_STATUS_CHIP_RESET) // if gh30x reset, need reinit
+    else if (GH3011_IRQ_Status == INT_STATUS_CHIP_RESET) // if GH3011 reset, need reinit
     {
-        gh30x_reset_evt_handler();
+        GH3011_Reset_Event_Handler();
     }
-    else if (gh30x_irq_status == INT_STATUS_FIFO_FULL) // if gh30x fifo full, need restart
+    else if (GH3011_IRQ_Status == INT_STATUS_FIFO_FULL) // if GH3011 fifo full, need restart
     {
-        gh30x_fifo_full_evt_handler();
+        GH3011_FIFO_Full_Event_Handler();
     }
 
-    if ((gh30x_adt_working_flag == 1) && (gh30x_irq_status != INT_STATUS_WEAR_DETECTED) && (gh30x_irq_status != INT_STATUS_UNWEAR_DETECTED)) // adt working
+    if ((GH3011_ADT_Working_Flag == 1) && (GH3011_IRQ_Status != INT_STATUS_WEAR_DETECTED) && (GH3011_IRQ_Status != INT_STATUS_UNWEAR_DETECTED)) // adt working
     {
-        // adt 已经启动 但是发生了意外的中断 佩戴和没有佩戴都没有检测到
+        // ADT 已经启动 但是发生了意外的中断 佩戴和没有佩戴都没有检测到
         GH3011_ADT_WeraDetect_Start(&GH3011);
     }
 }

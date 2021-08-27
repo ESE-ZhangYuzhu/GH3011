@@ -172,14 +172,16 @@ void TIM6_IRQHandler(void) // 500ms
   }
 }
 
-void TIM7_IRQHandler(void) // 20ms
+void TIM7_IRQHandler(void) // 50ms
 {
   if (TIM_GetITStatus(TIM7, TIM_IT_Update) != RESET)
   {
     /********** User Code **************/
     TIM_Cmd(TIM7, DISABLE);
     if (0 == PCin(2))
+    {
       GH3011_ADT_WeraDetect_Start(&GH3011);
+    }
     /********** User Code End***********/
     TIM_ClearITPendingBit(TIM7, TIM_IT_Update);
   }
@@ -221,7 +223,7 @@ void EXTI3_IRQHandler(void)
     /********** User Code **************/
     if (PAin(3) == 1)
     {
-      gh30x_int_msg_handler();
+      GH3011_Handler();
     }
     /********** User Code End***********/
     EXTI_ClearITPendingBit(EXTI_Line3);

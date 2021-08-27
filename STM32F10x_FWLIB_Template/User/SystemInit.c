@@ -2,7 +2,7 @@
  * @Author: yz.zhang[zhang.yz2@yuyue.com.cn]
  * @Date: 2021-07-22 18:26:38
  * @LastEditors: Zhang Yuzhu
- * @LastEditTime: 2021-08-17 10:12:34
+ * @LastEditTime: 2021-08-24 17:53:01
  * @FilePath: \STM32F10x_FWLIB_Template\User\SystemInit.c
  * @Description:
  */
@@ -115,7 +115,7 @@ static void BasicTimer_Function_Init(void)
   TIM_Cmd(TIM6, DISABLE);
 
   TIM_TimeBaseInitStruct.TIM_Prescaler = SystemCoreClock / 1000 - 1; // 1ms
-  TIM_TimeBaseInitStruct.TIM_Period = 20 - 1;
+  TIM_TimeBaseInitStruct.TIM_Period = 50 - 1;
 
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM7, ENABLE);
   TIM_TimeBaseInit(TIM7, &TIM_TimeBaseInitStruct);
